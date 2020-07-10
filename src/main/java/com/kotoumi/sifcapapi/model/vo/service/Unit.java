@@ -16,14 +16,14 @@ public class Unit {
     /**
      * 成员ID
      */
-    private int unitId;
+    private Integer unitId;
     /**
      * 成员等级
      */
-    private int level;
+    private Integer level;
     /**
      * 成员rank
      */
-    private int displayRank;
+    private Integer displayRank;
 
 }

@@ -20,6 +20,7 @@ public class User {
     /**
      * 对外输出用：uid
      */
+    @Transient
     private String uid;
     /**
      * uid
