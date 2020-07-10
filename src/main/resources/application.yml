@@ -3,6 +3,8 @@ spring:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
     default-property-inclusion: non_null
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
 logging:
   path: logs/
