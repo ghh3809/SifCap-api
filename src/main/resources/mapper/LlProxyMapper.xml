@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kotoumi.sifcapapi.dao.mapper.LlProxyMapper">
+
+    <select id="searchUser" resultType="com.kotoumi.sifcapapi.model.vo.service.User">
+        select *
+        from user
+        <where>user_id like "%"#{keyword}"%" or name like "%"#{keyword}"%" or invite_code like "%"#{keyword}"%"</where>
+        limit #{limit}
+    </select>
+
+    <select id="findUser" resultType="com.kotoumi.sifcapapi.model.vo.service.User">
+        select *
+        from user
+        <where>user_id = #{userId}</where>
+        limit 1
+    </select>
+
+</mapper>

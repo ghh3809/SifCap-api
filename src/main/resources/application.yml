@@ -1,0 +1,22 @@
+spring:
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+    default-property-inclusion: non_null
+
+logging:
+  path: logs/
+  level:
+    com.kotoumi.sifcapapi.dao: debug
+
+server:
+  port: 8090
+  servlet:
+    context-path: /api
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.kotoumi.sifcapapi.dao.mapper
+  configuration:
+    map-underscore-to-camel-case: true
+
