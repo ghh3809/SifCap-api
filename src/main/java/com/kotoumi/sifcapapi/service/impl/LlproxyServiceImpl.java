@@ -35,10 +35,8 @@ public class LlproxyServiceImpl implements LlproxyService {
         User user = llProxyMapper.findUser(uid);
         if (user != null) {
             updateUserInfo(user);
-            return user;
-        } else {
-            return new User();
         }
+        return user;
     }
 
     @Override
