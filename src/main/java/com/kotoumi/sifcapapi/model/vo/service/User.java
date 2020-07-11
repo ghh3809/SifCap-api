@@ -13,11 +13,6 @@ import org.springframework.data.annotation.Transient;
 public class User {
 
     /**
-     * 对外输出用：看板信息
-     */
-    @Transient
-    private Unit naviUnitInfo;
-    /**
      * 对外输出用：uid
      */
     @Transient
@@ -146,6 +141,36 @@ public class User {
      * 生日：日期
      */
     private Integer birthDay;
+    /**
+     * 称号ID
+     */
+    private Integer settingAwardId;
+    /**
+     * 背景ID
+     */
+    private Integer settingBackgroundId;
+    /**
+     * 个人简介
+     */
+    private String introduction;
+    /**
+     * 头像信息
+     */
+    private String centerUnitInfoJson;
+    /**
+     * 对外输出用：头像信息
+     */
+    @Transient
+    private Unit centerUnitInfo;
+    /**
+     * 看板信息
+     */
+    private String naviUnitInfoJson;
+    /**
+     * 对外输出用：看板信息
+     */
+    @Transient
+    private Unit naviUnitInfo;
     /**
      * 创建时间
      */

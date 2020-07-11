@@ -2,12 +2,15 @@ package com.kotoumi.sifcapapi.model.vo.service;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.annotation.Transient;
 
+import java.util.List;
+
+/**
+ * @author guohaohao
+ */
 @Data
-@AllArgsConstructor
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Live {
 
@@ -23,38 +26,6 @@ public class Live {
      * difficulty id
      */
     private Integer liveDifficultyId;
-    /**
-     * setting id
-     */
-    private Integer liveSettingId;
-    /**
-     * 难度
-     */
-    private Integer difficulty;
-    /**
-     * 星级
-     */
-    private Integer stageLevel;
-    /**
-     * icon资源
-     */
-    private String liveIconAsset;
-    /**
-     * track id
-     */
-    private Integer liveTrackId;
-    /**
-     * 歌曲名
-     */
-    private String name;
-    /**
-     * 标题资源
-     */
-    private String titleAsset;
-    /**
-     * 音乐资源
-     */
-    private String soundAsset;
     /**
      * 是否随机
      */
@@ -103,16 +74,50 @@ public class Live {
     /**
      * 清纯分数
      */
-    private Integer scorePure;
+    private Integer scoreCute;
     /**
      * 洒脱分数
      */
-    private Integer scorePoor;
+    private Integer scoreCool;
     /**
      * 对外输出用：总分数
      */
     @Transient
     private Integer score;
+    /**
+     * 活动ID
+     */
+    private Integer eventId;
+    /**
+     * 活动名
+     */
+    @Transient
+    private String eventName;
+    /**
+     * 获得爱心
+     */
+    private Integer loveCnt;
+    /**
+     * 获得经验
+     */
+    private Integer expCnt;
+    /**
+     * 获得金币
+     */
+    private Integer gameCoinCnt;
+    /**
+     * 获得友情点
+     */
+    private Integer socialPointCnt;
+    /**
+     * 队伍详情
+     */
+    private String unitListJson;
+    /**
+     * 对外输出用：队伍详情
+     */
+    @Transient
+    private List<Unit> unitList;
     /**
      * 完成时间
      */
@@ -122,5 +127,37 @@ public class Live {
      */
     @Transient
     private String updateTime;
+    /**
+     * setting id
+     */
+    private Integer liveSettingId;
+    /**
+     * 难度
+     */
+    private Integer difficulty;
+    /**
+     * 星级
+     */
+    private Integer stageLevel;
+    /**
+     * icon资源
+     */
+    private String liveIconAsset;
+    /**
+     * track id
+     */
+    private Integer liveTrackId;
+    /**
+     * 歌曲名
+     */
+    private String name;
+    /**
+     * 标题资源
+     */
+    private String titleAsset;
+    /**
+     * 音乐资源
+     */
+    private String soundAsset;
 
 }

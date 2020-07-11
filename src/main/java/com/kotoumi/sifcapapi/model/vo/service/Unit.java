@@ -9,7 +9,6 @@ import lombok.Data;
  * @author guohaohao
  */
 @Data
-@AllArgsConstructor
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Unit {
 
@@ -25,5 +24,13 @@ public class Unit {
      * 成员rank
      */
     private Integer displayRank;
+    /**
+     * 未觉头像
+     */
+    private String normalIconAsset;
+    /**
+     * 觉醒头像
+     */
+    private String rankMaxIconAsset;
 
 }

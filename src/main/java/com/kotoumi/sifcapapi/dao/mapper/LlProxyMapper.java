@@ -1,5 +1,7 @@
 package com.kotoumi.sifcapapi.dao.mapper;
 
+import com.kotoumi.sifcapapi.model.vo.service.Live;
+import com.kotoumi.sifcapapi.model.vo.service.Unit;
 import com.kotoumi.sifcapapi.model.vo.service.User;
 import org.apache.ibatis.annotations.Param;
 
@@ -25,5 +27,38 @@ public interface LlProxyMapper {
      * @return 用户信息
      */
     User findUser(@Param("userId") int userId);
+
+    /**
+     * 搜索演唱会信息
+     * @param userId 用户ID
+     * @param start 开始顺位
+     * @param limit 显示数量
+     * @param setId live_setting_id
+     * @param eventId 活动ID
+     * @return 演唱会信息
+     */
+    List<Live> searchLive(@Param("userId") int userId,
+                          @Param("start") int start,
+                          @Param("limit") int limit,
+                          @Param("setId") Integer setId,
+                          @Param("eventId") Integer eventId);
+
+    /**
+     * 演唱会信息总数
+     * @param userId 用户ID
+     * @param setId live_setting_id
+     * @param eventId 活动ID
+     * @return 演唱会信息
+     */
+    int countLive(@Param("userId") int userId,
+                  @Param("setId") Integer setId,
+                  @Param("eventId") Integer eventId);
+
+    /**
+     * 根据unitId寻找卡牌
+     * @param unitId unit id
+     * @return 用户信息
+     */
+    Unit findUnit(@Param("unitId") int unitId);
 
 }
