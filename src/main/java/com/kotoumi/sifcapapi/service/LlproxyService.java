@@ -34,6 +34,6 @@ public interface LlproxyService {
      * @param eventId 活动ID
      * @return 演唱会信息
      */
-    LiveInfoResponse liveInfo(int uid, int page, int limit, Integer setId, Integer eventId);
+    LiveInfoResponse liveInfo(int uid, int page, int limit, Integer setId, Integer eventId, String keyword);
 
 }

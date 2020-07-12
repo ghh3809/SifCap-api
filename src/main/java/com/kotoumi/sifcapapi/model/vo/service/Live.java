@@ -68,6 +68,11 @@ public class Live {
     @Transient
     private Boolean fc;
     /**
+     * 对外输出用：是否ap
+     */
+    @Transient
+    private Boolean ap;
+    /**
      * 甜美分数
      */
     private Integer scoreSmile;
@@ -91,7 +96,6 @@ public class Live {
     /**
      * 活动名
      */
-    @Transient
     private String eventName;
     /**
      * 获得爱心

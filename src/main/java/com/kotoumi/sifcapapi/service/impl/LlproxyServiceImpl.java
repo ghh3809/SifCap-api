@@ -40,15 +40,15 @@ public class LlproxyServiceImpl implements LlproxyService {
     }
 
     @Override
-    public LiveInfoResponse liveInfo(int uid, int page, int limit, Integer setId, Integer eventId) {
+    public LiveInfoResponse liveInfo(int uid, int page, int limit, Integer setId, Integer eventId, String keyword) {
         int start = limit * (page - 1);
-        List<Live> liveList = llProxyMapper.searchLive(uid, start, limit, setId, eventId);
-        int liveCount = llProxyMapper.countLive(uid, start, limit);
+        List<Live> liveList = llProxyMapper.searchLive(uid, start, limit, setId, eventId, keyword);
+        int liveCount = llProxyMapper.countLive(uid, setId, eventId, keyword);
         for (Live live : liveList) {
             updateLiveInfo(live);
         }
 
-        return new LiveInfoResponse(liveList, page, liveCount / limit, limit, liveCount);
+        return new LiveInfoResponse(liveList, page, (liveCount - 1) / limit + 1, limit, liveCount);
     }
 
     /**
@@ -57,12 +57,16 @@ public class LlproxyServiceImpl implements LlproxyService {
      */
     private void updateUserInfo(User user) {
         user.setUid(user.getUserId());
-        user.setNaviUnitInfo(JSON.parseObject(user.getNaviUnitInfoJson(), Unit.class));
-        user.setNaviUnitInfoJson(null);
-        updateUnitInfo(user.getNaviUnitInfo());
-        user.setCenterUnitInfo(JSON.parseObject(user.getCenterUnitInfoJson(), Unit.class));
-        user.setCenterUnitInfoJson(null);
-        updateUnitInfo(user.getCenterUnitInfo());
+        if (user.getNaviUnitInfoJson() != null) {
+            user.setNaviUnitInfo(JSON.parseObject(user.getNaviUnitInfoJson(), Unit.class));
+            user.setNaviUnitInfoJson(null);
+            updateUnitInfo(user.getNaviUnitInfo());
+        }
+        if (user.getCenterUnitInfoJson() != null) {
+            user.setCenterUnitInfo(JSON.parseObject(user.getCenterUnitInfoJson(), Unit.class));
+            user.setCenterUnitInfoJson(null);
+            updateUnitInfo(user.getCenterUnitInfo());
+        }
     }
 
     /**
@@ -81,12 +85,8 @@ public class LlproxyServiceImpl implements LlproxyService {
      */
     private void updateLiveInfo(Live live) {
         live.setFc((live.getGoodCnt() == 0) && (live.getBadCnt() == 0) && (live.getMissCnt() == 0));
+        live.setAp(live.getFc() && live.getGreatCnt() == 0);
         live.setScore(live.getScoreSmile() + live.getScoreCute() + live.getScoreCool());
-        if (live.getEventId() == 0) {
-            live.setEventName("");
-        } else {
-            live.setEventName("event id: " + live.getEventId());
-        }
         live.setUnitList(null);
         live.setUnitListJson(null);
         live.setUpdateTime(live.getPlayTime());

@@ -21,7 +21,8 @@
                setting.*,
                live_track_m.name,
                live_track_m.title_asset,
-               live_track_m.sound_asset
+               live_track_m.sound_asset,
+               event_map.event_name
         from (
             select * from live_play where user_id = #{userId}
             <if test="eventId != null">
@@ -48,16 +49,24 @@
         on live_difficulty.live_setting_id = setting.live_setting_id
         left join live_track_m
         on setting.live_track_id = live_track_m.live_track_id
-        <if test="setId != null">
-            <where>setting.live_setting_id = #{setId}</where>
-        </if>
+        left join event_map
+        on play.event_id = event_map.event_id
+        <where>
+            <if test="setId != null">
+                live_difficulty.live_setting_id = #{setId}
+            </if>
+            <if test="keyword != null">
+                and (live_track_m.name like "%"#{keyword}"%" or event_map.event_name like "%"#{keyword}"%")
+            </if>
+        </where>
+        order by play.play_time desc
         limit #{start}, #{limit}
     </select>
 
     <select id="countLive" resultType="Integer">
         select count(1)
         from (
-        select * from live_play where user_id = #{userId}
+            select * from live_play where user_id = #{userId}
             <if test="eventId != null">
                 and event_id = #{eventId}
             </if>
@@ -69,14 +78,29 @@
         ) live_difficulty
         on play.live_difficulty_id = live_difficulty.live_difficulty_id
         left join (
-            select * from live_setting_m
+            select live_setting_id,
+                   difficulty,
+                   stage_level,
+                   live_icon_asset,
+                   live_track_id
+            from live_setting_m
             <if test="setId != null">
                 where live_setting_id = #{setId}
             </if>
         ) setting
-        on live_difficulty.live_setting_id = setting.live_setting_id
-        left join live_track_m
-        on setting.live_track_id = live_track_m.live_track_id
+            on live_difficulty.live_setting_id = setting.live_setting_id
+            left join live_track_m
+            on setting.live_track_id = live_track_m.live_track_id
+            left join event_map
+            on play.event_id = event_map.event_id
+        <where>
+            <if test="setId != null">
+                live_difficulty.live_setting_id = #{setId}
+            </if>
+            <if test="keyword != null">
+                and (live_track_m.name like "%"#{keyword}"%" or event_map.event_name like "%"#{keyword}"%")
+            </if>
+        </where>
     </select>
 
     <select id="findUnit" resultType="com.kotoumi.sifcapapi.model.vo.service.Unit">

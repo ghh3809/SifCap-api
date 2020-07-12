@@ -41,7 +41,8 @@ public interface LlProxyMapper {
                           @Param("start") int start,
                           @Param("limit") int limit,
                           @Param("setId") Integer setId,
-                          @Param("eventId") Integer eventId);
+                          @Param("eventId") Integer eventId,
+                          @Param("keyword") String keyword);
 
     /**
      * 演唱会信息总数
@@ -52,7 +53,8 @@ public interface LlProxyMapper {
      */
     int countLive(@Param("userId") int userId,
                   @Param("setId") Integer setId,
-                  @Param("eventId") Integer eventId);
+                  @Param("eventId") Integer eventId,
+                  @Param("keyword") String keyword);
 
     /**
      * 根据unitId寻找卡牌

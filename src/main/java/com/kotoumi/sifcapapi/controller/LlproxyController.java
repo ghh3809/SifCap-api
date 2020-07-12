@@ -53,10 +53,12 @@ public class LlproxyController extends BaseController {
                                       @Min(value = 1, message = "page") int page,
                                       @Min(value = 1, message = "limit") int limit,
                                       @RequestParam(name = "setid", required = false) Integer setId,
-                                      @RequestParam(name = "eventid", required = false) Integer eventId) {
+                                      @RequestParam(name = "eventid", required = false) Integer eventId,
+                                      @RequestParam(name = "keyword", required = false) String keyword) {
 
-        log.info("liveInfo uid: {}, page: {}, limit: {}, setId: {}, eventId: {}", uid, page, limit, setId, eventId);
-        LiveInfoResponse liveInfoResponse = llproxyService.liveInfo(uid, page, limit, setId, eventId);
+        log.info("liveInfo uid: {}, page: {}, limit: {}, setId: {}, eventId: {}, keyword: {}",
+                uid, page, limit, setId, eventId, keyword);
+        LiveInfoResponse liveInfoResponse = llproxyService.liveInfo(uid, page, limit, setId, eventId, keyword);
         return ResponseEntity.ok(finish(liveInfoResponse));
 
     }
