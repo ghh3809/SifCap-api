@@ -1,9 +1,18 @@
 package com.kotoumi.sifcapapi.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
+import com.kotoumi.sifcapapi.model.vo.response.SecretBoxLogResponse;
+import com.kotoumi.sifcapapi.model.vo.response.UnitsInfoResponse;
+import com.kotoumi.sifcapapi.model.vo.service.SecretBoxLog;
+import com.kotoumi.sifcapapi.model.vo.service.Unit;
 import com.kotoumi.sifcapapi.model.vo.service.User;
 import com.kotoumi.sifcapapi.service.LlproxyService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,7 +60,6 @@ public class LlproxyController extends BaseController {
 
     }
 
-
     @GetMapping("liveInfo")
     public ResponseEntity<?> liveInfo(@Min(value = 1, message = "uid") int uid,
                                       @Min(value = 1, message = "page") int page,
@@ -63,6 +75,43 @@ public class LlproxyController extends BaseController {
 
     }
 
+    @GetMapping("secretBoxLog")
+    public ResponseEntity<?> secretBoxLog(@Min(value = 1, message = "uid") int uid,
+                                          @Min(value = 1, message = "page") int page,
+                                          @Min(value = 1, message = "limit") int limit,
+                                          @RequestParam(name = "type", required = false) Integer type) {
 
+        log.info("secretBoxLog uid: {}, page: {}, limit: {}, type: {}", uid, page, limit, type);
+        SecretBoxLogResponse secretBoxLogResponse = llproxyService.secretBoxLog(uid, page, limit, type);
+        return ResponseEntity.ok(finish(secretBoxLogResponse));
+
+    }
+
+    @GetMapping("unitsInfo")
+    public ResponseEntity<?> unitsInfo(@Min(value = 1, message = "uid") int uid,
+                                          @Min(value = 1, message = "page") int page,
+                                          @Min(value = 1, message = "limit") int limit) {
+
+        log.info("unitsInfo uid: {}, page: {}, limit: {}", uid, page, limit);
+        UnitsInfoResponse unitsInfoResponse = llproxyService.unitsInfo(uid, page, limit);
+        return ResponseEntity.ok(finish(unitsInfoResponse));
+
+    }
+
+    @GetMapping("unitsExport")
+    public ResponseEntity<?> unitsExport(@Min(value = 1, message = "uid") int uid) {
+
+        log.info("unitsExport uid: {}", uid);
+        List<LLHelperUnit> llHelperUnitList = llproxyService.unitsExport(uid);
+        String members = String.format("{\"version\":103,\"team\":[],\"gemstock\":{},\"submember\":%s}",
+                JSON.toJSONString(llHelperUnitList));
+        InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(members.getBytes()));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment;filename=" + "submembers-" + uid + ".sd")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM).contentLength(members.getBytes().length)
+                .body(resource);
+
+    }
 
 }

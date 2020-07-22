@@ -2,13 +2,17 @@ package com.kotoumi.sifcapapi.model.vo.service;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Transient;
 
 /**
  * @author guohaohao
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class User {
 
@@ -16,11 +20,11 @@ public class User {
      * 对外输出用：uid
      */
     @Transient
-    private String uid;
+    private Integer uid;
     /**
      * uid
      */
-    private String userId;
+    private Integer userId;
     /**
      * 用户昵称
      */
@@ -104,7 +108,7 @@ public class User {
     /**
      * 用户ID
      */
-    private Integer inviteCode;
+    private String inviteCode;
     /**
      * 未知字段
      */

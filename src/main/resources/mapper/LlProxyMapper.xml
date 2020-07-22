@@ -33,6 +33,8 @@
             (select live_difficulty_id, live_setting_id from normal_live_m)
             union all
             (select live_difficulty_id, live_setting_id from special_live_m)
+            union all
+            (select live_difficulty_id, live_setting_id from event_live_m)
         ) live_difficulty
         on play.live_difficulty_id = live_difficulty.live_difficulty_id
         left join (
@@ -59,7 +61,7 @@
                 and (live_track_m.name like "%"#{keyword}"%" or event_map.event_name like "%"#{keyword}"%")
             </if>
         </where>
-        order by play.play_time desc
+        order by play.id desc
         limit #{start}, #{limit}
     </select>
 
@@ -75,6 +77,8 @@
             (select live_difficulty_id, live_setting_id from normal_live_m)
             union all
             (select live_difficulty_id, live_setting_id from special_live_m)
+            union all
+            (select live_difficulty_id, live_setting_id from event_live_m)
         ) live_difficulty
         on play.live_difficulty_id = live_difficulty.live_difficulty_id
         left join (
@@ -108,6 +112,105 @@
         from unit_m
         <where>unit_id = #{unitId}</where>
         limit 1
+    </select>
+
+    <select id="searchUnits" resultType="com.kotoumi.sifcapapi.model.vo.service.Unit">
+        select units.*,
+               unit_info.rarity,
+               unit_info.rarity_string,
+               unit_info.eponym,
+               unit_info.name,
+               unit_info.normal_icon_asset,
+               unit_info.rank_max_icon_asset
+        from (
+            select * from unit where user_id = #{userId}
+        ) units
+        inner join (
+            select unit_id, rarity, case rarity when 1 then 'N' when 2 then 'R' when 3 then 'SR' when 4 then 'UR' when 5 then 'SSR' else '' end as rarity_string,
+                   eponym, name, normal_icon_asset, rank_max_icon_asset from unit_m
+            where rarity &gt;= 3
+        ) unit_info
+        on units.unit_id = unit_info.unit_id
+        order by unit_info.rarity_string desc, units.unit_id
+        limit #{start}, #{limit}
+    </select>
+
+    <select id="countUnits" resultType="Integer">
+        select count(1)
+        from (
+            select * from unit where user_id = #{userId}
+        ) units
+        inner join (
+            select unit_id from unit_m where rarity &gt;= 3
+        ) unit_info
+        on units.unit_id = unit_info.unit_id
+    </select>
+
+    <select id="exportUnits" resultType="com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit">
+        select unit_info.unit_number as cardid,
+               units.`rank` - 1 as mezame,
+               units.unit_skill_level as skilllevel,
+               units.unit_removable_skill_capacity as maxcost
+        from (
+             select * from unit where user_id = #{userId}
+        ) units
+        inner join (
+            select unit_id, unit_number from unit_m
+            where rarity &gt;= 3
+        ) unit_info
+        on units.unit_id = unit_info.unit_id
+    </select>
+
+    <select id="searchSecretBoxLog" resultType="com.kotoumi.sifcapapi.model.vo.service.SecretBoxLog">
+        select box.user_id,
+               box.secret_box_id,
+               box.name,
+               SUM(IF(box.rarity = 1, 1, 0)) as normal_cnt,
+               SUM(IF(box.rarity = 2, 1, 0)) as rare_cnt,
+               SUM(IF(box.rarity = 3, 1, 0)) as sr_cnt,
+               SUM(IF(box.rarity = 5, 1, 0)) as ssr_cnt,
+               SUM(IF(box.rarity = 4, 1, 0)) as ur_cnt,
+               box.pon_time,
+               JSON_ARRAYAGG(JSON_OBJECT(
+                   'unit_id', box.unit_id,
+                   'rank', box.rank,
+                   'rarity', box.rarity,
+                   'normal_icon_asset', unit_info.normal_icon_asset,
+                   'rank_max_icon_asset', unit_info.rank_max_icon_asset
+                   )) as unitsJson
+        from (
+            select * from secret_box where user_id = #{userId}
+            <choose>
+                <when test="type == 1">
+                    and (secret_box_id = 1 or secret_box_id = 61)
+                </when>
+                <otherwise>
+                    and secret_box_id != 1 and secret_box_id != 61
+                </otherwise>
+            </choose>
+        ) box
+        left join (
+            select * from unit_m
+        ) unit_info
+        on box.unit_id = unit_info.unit_id
+        group by box.user_id, box.secret_box_id, box.name, box.pon_time
+        order by box.pon_time desc
+        limit #{start}, #{limit}
+    </select>
+
+    <select id="countSecretBoxLog" resultType="Integer">
+        select count(1) from (
+            select secret_box.user_id, secret_box.secret_box_id, secret_box.name, secret_box.pon_time from secret_box where user_id = #{userId}
+            <choose>
+                <when test="type == 1">
+                    and (secret_box_id = 1 or secret_box_id = 61)
+                </when>
+                <otherwise>
+                    and secret_box_id != 1 and secret_box_id != 61
+                </otherwise>
+            </choose>
+            group by secret_box.user_id, secret_box.secret_box_id, secret_box.name, secret_box.pon_time
+        ) a
     </select>
 
 </mapper>

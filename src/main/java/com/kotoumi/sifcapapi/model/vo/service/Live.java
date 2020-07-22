@@ -2,7 +2,9 @@ package com.kotoumi.sifcapapi.model.vo.service;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Transient;
 
 import java.util.List;
@@ -11,13 +13,15 @@ import java.util.List;
  * @author guohaohao
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Live {
 
     /**
      * 自增ID
      */
-    private Integer id;
+    private Long id;
     /**
      * 用户uid
      */
