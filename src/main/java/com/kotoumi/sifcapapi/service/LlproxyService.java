@@ -1,5 +1,6 @@
 package com.kotoumi.sifcapapi.service;
 
+import com.kotoumi.sifcapapi.model.vo.response.DeckInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.response.SecretBoxLogResponse;
@@ -64,5 +65,20 @@ public interface LlproxyService {
      * @return llhelper卡组信息
      */
     List<LLHelperUnit> unitsExport(int uid);
+
+    /**
+     * 获取队伍信息
+     * @param uid 用户id
+     * @return 抽卡记录
+     */
+    DeckInfoResponse deckInfo(int uid);
+
+    /**
+     * 导出llhelper队伍信息
+     * @param uid 用户id
+     * @param unitDeckId 卡组ID
+     * @return llhelper卡组信息
+     */
+    List<LLHelperUnit> deckExport(int uid, int unitDeckId);
 
 }

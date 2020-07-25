@@ -1,6 +1,7 @@
 package com.kotoumi.sifcapapi.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.kotoumi.sifcapapi.model.vo.response.DeckInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.response.SecretBoxLogResponse;
@@ -10,6 +11,7 @@ import com.kotoumi.sifcapapi.model.vo.service.Unit;
 import com.kotoumi.sifcapapi.model.vo.service.User;
 import com.kotoumi.sifcapapi.service.LlproxyService;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -43,7 +45,7 @@ public class LlproxyController extends BaseController {
 
     @GetMapping("userSearch")
     public ResponseEntity<?> userSearch(@NotBlank(message = "keyword") String keyword,
-                                      @Min(value = 1, message = "limit") int limit) {
+                                        @Min(value = 1, message = "limit") int limit) {
 
         log.info("userSearch keyword: {}, limit: {}", keyword, limit);
         List<User> userList = llproxyService.userSearch(keyword, limit);
@@ -89,8 +91,8 @@ public class LlproxyController extends BaseController {
 
     @GetMapping("unitsInfo")
     public ResponseEntity<?> unitsInfo(@Min(value = 1, message = "uid") int uid,
-                                          @Min(value = 1, message = "page") int page,
-                                          @Min(value = 1, message = "limit") int limit) {
+                                       @Min(value = 1, message = "page") int page,
+                                       @Min(value = 1, message = "limit") int limit) {
 
         log.info("unitsInfo uid: {}, page: {}, limit: {}", uid, page, limit);
         UnitsInfoResponse unitsInfoResponse = llproxyService.unitsInfo(uid, page, limit);
@@ -109,6 +111,31 @@ public class LlproxyController extends BaseController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment;filename=" + "submembers-" + uid + ".sd")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM).contentLength(members.getBytes().length)
+                .body(resource);
+
+    }
+
+    @GetMapping("deckInfo")
+    public ResponseEntity<?> deckInfo(@Min(value = 1, message = "uid") int uid) {
+
+        log.info("deckInfo uid: {}", uid);
+        DeckInfoResponse deckInfoResponse = llproxyService.deckInfo(uid);
+        return ResponseEntity.ok(finish(deckInfoResponse));
+
+    }
+
+    @GetMapping("deckExport")
+    public ResponseEntity<?> deckExport(@Min(value = 1, message = "uid") int uid,
+                                         @Range(min = 1, max = 18) int unitDeckId) {
+
+        log.info("deckExport uid: {}, unitDeckId: {}", uid, unitDeckId);
+        List<LLHelperUnit> llHelperUnitList = llproxyService.deckExport(uid, unitDeckId);
+        String members = JSON.toJSONString(llHelperUnitList);
+        InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(members.getBytes()));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment;filename=" + "unit-" + uid + "-" + unitDeckId + ".sd")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM).contentLength(members.getBytes().length)
                 .body(resource);
 

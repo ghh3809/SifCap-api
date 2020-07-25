@@ -18,7 +18,7 @@ public class LLHelperUnit {
     /**
      * 卡ID
      */
-    private String cardid;
+    private Integer cardid;
     /**
      * 是否觉醒（0/1）
      */
@@ -31,5 +31,21 @@ public class LLHelperUnit {
      * 孔数
      */
     private Integer maxcost;
+    /**
+     * 甜美属性
+     */
+    private Integer smile;
+    /**
+     * 清纯属性
+     */
+    private Integer pure;
+    /**
+     * 洒脱属性
+     */
+    private Integer cool;
+
+    public static LLHelperUnit getBlankUnit() {
+        return new LLHelperUnit(1, 0, 1, 0, 0, 0, 0);
+    }
 
 }

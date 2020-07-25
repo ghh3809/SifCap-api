@@ -1,13 +1,16 @@
 package com.kotoumi.sifcapapi.dao.mapper;
 
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
+import com.kotoumi.sifcapapi.model.vo.service.Deck;
 import com.kotoumi.sifcapapi.model.vo.service.Live;
 import com.kotoumi.sifcapapi.model.vo.service.SecretBoxLog;
 import com.kotoumi.sifcapapi.model.vo.service.Unit;
 import com.kotoumi.sifcapapi.model.vo.service.User;
+import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author guohaohao
@@ -18,7 +21,7 @@ public interface LlProxyMapper {
      * 根据关键字寻找用户
      * @param keyword UID/ID/昵称
      * @param limit limit数
-     * @return 用户信息
+     * @return 用户信息列表
      */
     List<User> searchUser(@Param("keyword") String keyword,
                           @Param("limit") int limit);
@@ -61,11 +64,22 @@ public interface LlProxyMapper {
                   @Param("keyword") String keyword);
 
     /**
-     * 根据unitId寻找卡牌
-     * @param unitId unit id
-     * @return 用户信息
+     * 根据unitId列表寻找卡牌信息
+     * @param unitList unitId列表
+     * @return 卡牌信息
      */
-    Unit findUnit(@Param("unitId") int unitId);
+    @MapKey("unitId")
+    Map<Integer, Unit> findUnits(@Param("unitList") List<Integer> unitList);
+
+    /**
+     * 根据unitOwningUserId列表寻找卡牌信息
+     * @param userId 用户ID
+     * @param unitList unitOwningList列表
+     * @return 卡牌信息
+     */
+    @MapKey("unitOwningUserId")
+    Map<Long, Unit> findUnitsByOwningIds(@Param("userId") Integer userId,
+                                         @Param("unitList") List<Long> unitList);
 
     /**
      * 获取用户卡组信息
@@ -113,5 +127,14 @@ public interface LlProxyMapper {
      */
     int countSecretBoxLog(@Param("userId") int userId,
                           @Param("type") Integer type);
+
+    /**
+     * 获取用户队伍信息
+     * @param userId 用户ID
+     * @param unitDeckId 队伍ID
+     * @return 队伍信息
+     */
+    List<Deck> findDecks(@Param("userId") int userId,
+                         @Param("unitDeckId") Integer unitDeckId);
 
 }

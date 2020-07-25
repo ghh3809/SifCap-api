@@ -107,11 +107,44 @@
         </where>
     </select>
 
-    <select id="findUnit" resultType="com.kotoumi.sifcapapi.model.vo.service.Unit">
-        select *
+    <select id="findUnits" resultType="com.kotoumi.sifcapapi.model.vo.service.Unit">
+        select unit_id,
+               unit_number,
+               eponym,
+               name,
+               concat('/git/SIFStatic/icon/normal/', unit_number, '.png') as normal_icon_asset,
+               concat('/git/SIFStatic/icon/rankup/', unit_number, '.png') as rank_max_icon_asset
         from unit_m
-        <where>unit_id = #{unitId}</where>
-        limit 1
+        <where>
+            unit_id in
+            <foreach collection="unitList" item="unitId" index="index" open="(" close=")" separator=",">
+                #{unitId}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="findUnitsByOwningIds" resultType="com.kotoumi.sifcapapi.model.vo.service.Unit">
+        select unit_list.*,
+               unit_m.rarity,
+               unit_m.eponym,
+               unit_m.name,
+               unit_m.unit_number,
+               concat('/git/SIFStatic/icon/normal/', unit_m.unit_number, '.png') as normal_icon_asset,
+               concat('/git/SIFStatic/icon/rankup/', unit_m.unit_number, '.png') as rank_max_icon_asset,
+               unit_m.smile_max,
+               unit_m.pure_max,
+               unit_m.cool_max
+        from (
+            select * from unit
+            <where>user_id = #{userId} and unit_owning_user_id in
+                <foreach
+                    collection="unitList" item="unitId" index="index" open="(" close=")" separator=",">
+                    #{unitId}
+                </foreach>
+            </where>
+        ) unit_list
+        inner join unit_m
+        on unit_list.unit_id = unit_m.unit_id
     </select>
 
     <select id="searchUnits" resultType="com.kotoumi.sifcapapi.model.vo.service.Unit">
@@ -120,14 +153,20 @@
                unit_info.rarity_string,
                unit_info.eponym,
                unit_info.name,
+               unit_info.unit_number,
                unit_info.normal_icon_asset,
-               unit_info.rank_max_icon_asset
+               unit_info.rank_max_icon_asset,
+               unit_info.smile_max,
+               unit_info.pure_max,
+               unit_info.cool_max
         from (
             select * from unit where user_id = #{userId}
         ) units
         inner join (
-            select unit_id, rarity, case rarity when 1 then 'N' when 2 then 'R' when 3 then 'SR' when 4 then 'UR' when 5 then 'SSR' else '' end as rarity_string,
-                   eponym, name, normal_icon_asset, rank_max_icon_asset from unit_m
+            select unit_id, unit_number, rarity, case rarity when 1 then 'N' when 2 then 'R' when 3 then 'SR' when 4 then 'UR' when 5 then 'SSR' else '' end as rarity_string,
+                   eponym, name, concat('/git/SIFStatic/icon/normal/', unit_number, '.png') as normal_icon_asset,
+                   concat('/git/SIFStatic/icon/rankup/', unit_number, '.png') as rank_max_icon_asset, smile_max, pure_max, cool_max
+            from unit_m
             where rarity &gt;= 3
         ) unit_info
         on units.unit_id = unit_info.unit_id
@@ -190,7 +229,14 @@
             </choose>
         ) box
         left join (
-            select * from unit_m
+            select unit_id,
+                   unit_number,
+                   eponym,
+                   name,
+                   concat('/git/SIFStatic/icon/normal/', unit_number, '.png') as normal_icon_asset,
+                   concat('/git/SIFStatic/icon/rankup/', unit_number, '.png') as rank_max_icon_asset,
+                   rarity
+            from unit_m
         ) unit_info
         on box.unit_id = unit_info.unit_id
         group by box.user_id, box.secret_box_id, box.name, box.pon_time
@@ -200,7 +246,7 @@
 
     <select id="countSecretBoxLog" resultType="Integer">
         select count(1) from (
-            select secret_box.user_id, secret_box.secret_box_id, secret_box.name, secret_box.pon_time from secret_box where user_id = #{userId}
+            select user_id, secret_box_id, name, pon_time from secret_box where user_id = #{userId}
             <choose>
                 <when test="type == 1">
                     and (secret_box_id = 1 or secret_box_id = 61)
@@ -209,8 +255,17 @@
                     and secret_box_id != 1 and secret_box_id != 61
                 </otherwise>
             </choose>
-            group by secret_box.user_id, secret_box.secret_box_id, secret_box.name, secret_box.pon_time
+            group by user_id, secret_box_id, name, pon_time
         ) a
+    </select>
+
+    <select id="findDecks" resultType="com.kotoumi.sifcapapi.model.vo.service.Deck">
+        select * from deck
+        where user_id = #{userId}
+        <if test="unitDeckId != null">
+            and unit_deck_id = #{unitDeckId}
+        </if>
+        order by unit_deck_id
     </select>
 
 </mapper>

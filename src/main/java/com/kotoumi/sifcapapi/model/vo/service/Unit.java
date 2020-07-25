@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Transient;
 
 /**
  * @author guohaohao
@@ -120,6 +121,10 @@ public class Unit {
      */
     private String name;
     /**
+     * 成员相册ID
+     */
+    private Integer unitNumber;
+    /**
      * 未觉头像
      */
     private String normalIconAsset;
@@ -135,5 +140,21 @@ public class Unit {
      * 稀有度string
      */
     private String rarityString;
+    /**
+     * 甜美属性
+     */
+    private Integer smileMax;
+    /**
+     * 清纯属性
+     */
+    private Integer pureMax;
+    /**
+     * 洒脱属性
+     */
+    private Integer coolMax;
+    /**
+     * 所在队伍位置
+     */
+    private Integer position;
 
 }
