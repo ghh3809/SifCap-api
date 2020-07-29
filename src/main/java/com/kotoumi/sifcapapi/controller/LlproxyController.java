@@ -92,19 +92,26 @@ public class LlproxyController extends BaseController {
     @GetMapping("unitsInfo")
     public ResponseEntity<?> unitsInfo(@Min(value = 1, message = "uid") int uid,
                                        @Min(value = 1, message = "page") int page,
-                                       @Min(value = 1, message = "limit") int limit) {
+                                       @Min(value = 1, message = "limit") int limit,
+                                       @RequestParam(name = "ssr", required = false) Integer ssr,
+                                       @RequestParam(name = "sr", required = false) Integer sr,
+                                       @RequestParam(name = "back", required = false) Integer back) {
 
-        log.info("unitsInfo uid: {}, page: {}, limit: {}", uid, page, limit);
-        UnitsInfoResponse unitsInfoResponse = llproxyService.unitsInfo(uid, page, limit);
+        log.info("unitsInfo uid: {}, page: {}, limit: {}, ssr: {}, sr: {}, back: {}",
+                uid, page, limit, ssr, sr, back);
+        UnitsInfoResponse unitsInfoResponse = llproxyService.unitsInfo(uid, page, limit, ssr, sr, back);
         return ResponseEntity.ok(finish(unitsInfoResponse));
 
     }
 
     @GetMapping("unitsExport")
-    public ResponseEntity<?> unitsExport(@Min(value = 1, message = "uid") int uid) {
+    public ResponseEntity<?> unitsExport(@Min(value = 1, message = "uid") int uid,
+                                         @RequestParam(name = "ssr", required = false) Integer ssr,
+                                         @RequestParam(name = "sr", required = false) Integer sr,
+                                         @RequestParam(name = "back", required = false) Integer back) {
 
-        log.info("unitsExport uid: {}", uid);
-        List<LLHelperUnit> llHelperUnitList = llproxyService.unitsExport(uid);
+        log.info("unitsExport uid: {}, ssr: {}, sr: {}, back: {}", uid, ssr, sr, back);
+        List<LLHelperUnit> llHelperUnitList = llproxyService.unitsExport(uid, ssr, sr, back);
         String members = String.format("{\"version\":103,\"team\":[],\"gemstock\":{},\"submember\":%s}",
                 JSON.toJSONString(llHelperUnitList));
         InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(members.getBytes()));
@@ -127,7 +134,7 @@ public class LlproxyController extends BaseController {
 
     @GetMapping("deckExport")
     public ResponseEntity<?> deckExport(@Min(value = 1, message = "uid") int uid,
-                                         @Range(min = 1, max = 18) int unitDeckId) {
+                                        @Range(min = 1, max = 18) int unitDeckId) {
 
         log.info("deckExport uid: {}, unitDeckId: {}", uid, unitDeckId);
         List<LLHelperUnit> llHelperUnitList = llproxyService.deckExport(uid, unitDeckId);

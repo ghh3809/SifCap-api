@@ -55,16 +55,22 @@ public interface LlproxyService {
      * @param uid 用户id
      * @param page 页码
      * @param limit 数量
+     * @param ssr 是否包含ssr
+     * @param sr 是否包含sr
+     * @param back 是否包含预备教室成员
      * @return 抽卡记录
      */
-    UnitsInfoResponse unitsInfo(int uid, int page, int limit);
+    UnitsInfoResponse unitsInfo(int uid, int page, int limit, Integer ssr, Integer sr, Integer back);
 
     /**
      * 导出llhelper卡组信息
      * @param uid 用户id
+     * @param ssr 是否包含ssr
+     * @param sr 是否包含sr
+     * @param back 是否包含预备教室成员
      * @return llhelper卡组信息
      */
-    List<LLHelperUnit> unitsExport(int uid);
+    List<LLHelperUnit> unitsExport(int uid, Integer ssr, Integer sr, Integer back);
 
     /**
      * 获取队伍信息

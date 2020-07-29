@@ -73,16 +73,16 @@ public class LlproxyServiceImpl implements LlproxyService {
     }
 
     @Override
-    public UnitsInfoResponse unitsInfo(int uid, int page, int limit) {
+    public UnitsInfoResponse unitsInfo(int uid, int page, int limit, Integer ssr, Integer sr, Integer back) {
         int start = limit * (page - 1);
-        List<Unit> unitList = llProxyMapper.searchUnits(uid, start, limit);
-        int unitCount = llProxyMapper.countUnits(uid);
+        List<Unit> unitList = llProxyMapper.searchUnits(uid, start, limit, ssr, sr, back);
+        int unitCount = llProxyMapper.countUnits(uid, ssr, sr, back);
         return new UnitsInfoResponse(unitList, page, (unitCount - 1) / limit + 1, limit, unitCount);
     }
 
     @Override
-    public List<LLHelperUnit> unitsExport(int uid) {
-        return llProxyMapper.exportUnits(uid);
+    public List<LLHelperUnit> unitsExport(int uid, Integer ssr, Integer sr, Integer back) {
+        return llProxyMapper.exportUnits(uid, ssr, sr, back);
     }
 
     @Override

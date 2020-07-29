@@ -86,25 +86,43 @@ public interface LlProxyMapper {
      * @param userId 用户ID
      * @param start 开始顺位
      * @param limit 显示数量
+     * @param ssr 是否包含ssr
+     * @param sr 是否包含sr
+     * @param back 是否包含预备教室成员
      * @return 卡组信息
      */
     List<Unit> searchUnits(@Param("userId") int userId,
                            @Param("start") int start,
-                           @Param("limit") int limit);
+                           @Param("limit") int limit,
+                           @Param("ssr") Integer ssr,
+                           @Param("sr") Integer sr,
+                           @Param("back") Integer back);
 
     /**
      * 演唱卡组总数
      * @param userId 用户ID
+     * @param ssr 是否包含ssr
+     * @param sr 是否包含sr
+     * @param back 是否包含预备教室成员
      * @return 卡组总数
      */
-    int countUnits(@Param("userId") int userId);
+    int countUnits(@Param("userId") int userId,
+                   @Param("ssr") Integer ssr,
+                   @Param("sr") Integer sr,
+                   @Param("back") Integer back);
 
     /**
      * 获取llhelper用户卡组信息
      * @param userId 用户ID
+     * @param ssr 是否包含ssr
+     * @param sr 是否包含sr
+     * @param back 是否包含预备教室成员
      * @return llhelper卡组信息
      */
-    List<LLHelperUnit> exportUnits(@Param("userId") int userId);
+    List<LLHelperUnit> exportUnits(@Param("userId") int userId,
+                                   @Param("ssr") Integer ssr,
+                                   @Param("sr") Integer sr,
+                                   @Param("back") Integer back);
 
     /**
      * 获取用户招募信息

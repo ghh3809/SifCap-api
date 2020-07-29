@@ -161,14 +161,23 @@
                unit_info.cool_max
         from (
             select * from unit where user_id = #{userId}
+            <if test="back != 1">
+                and status = 'active'
+            </if>
         ) units
         inner join (
             select unit_id, unit_number, rarity, case rarity when 1 then 'N' when 2 then 'R' when 3 then 'SR' when 4 then 'UR' when 5 then 'SSR' else '' end as rarity_string,
                    eponym, name, concat('/git/SIFStatic/icon/normal/', unit_number, '.png') as normal_icon_asset,
                    concat('/git/SIFStatic/icon/rankup/', unit_number, '.png') as rank_max_icon_asset, smile_max, pure_max, cool_max
             from unit_m
-            where rarity &gt;= 3
-        ) unit_info
+            where (rarity = 4
+            <if test="ssr == 1">
+                or rarity = 5
+            </if>
+            <if test="sr == 1">
+                or rarity = 3
+            </if>
+        )) unit_info
         on units.unit_id = unit_info.unit_id
         order by unit_info.rarity_string desc, units.unit_id
         limit #{start}, #{limit}
@@ -178,10 +187,20 @@
         select count(1)
         from (
             select * from unit where user_id = #{userId}
+            <if test="back != 1">
+                and status = 'active'
+            </if>
         ) units
         inner join (
-            select unit_id from unit_m where rarity &gt;= 3
-        ) unit_info
+            select unit_id from unit_m
+            where (rarity = 4
+            <if test="ssr == 1">
+                or rarity = 5
+            </if>
+            <if test="sr == 1">
+                or rarity = 3
+            </if>
+        )) unit_info
         on units.unit_id = unit_info.unit_id
     </select>
 
@@ -191,12 +210,21 @@
                units.unit_skill_level as skilllevel,
                units.unit_removable_skill_capacity as maxcost
         from (
-             select * from unit where user_id = #{userId}
+            select * from unit where user_id = #{userId}
+            <if test="back != 1">
+                and status = 'active'
+            </if>
         ) units
         inner join (
-            select unit_id, unit_number from unit_m
-            where rarity &gt;= 3
-        ) unit_info
+        select unit_id, unit_number from unit_m
+        where (rarity = 4
+            <if test="ssr == 1">
+                or rarity = 5
+            </if>
+            <if test="sr == 1">
+                or rarity = 3
+            </if>
+        )) unit_info
         on units.unit_id = unit_info.unit_id
     </select>
 
