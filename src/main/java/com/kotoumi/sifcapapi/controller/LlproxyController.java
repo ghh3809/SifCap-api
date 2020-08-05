@@ -3,6 +3,7 @@ package com.kotoumi.sifcapapi.controller;
 import com.alibaba.fastjson.JSON;
 import com.kotoumi.sifcapapi.model.vo.response.DeckInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
+import com.kotoumi.sifcapapi.model.vo.response.LiveDetailResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.response.SecretBoxLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.UnitsInfoResponse;
@@ -74,6 +75,30 @@ public class LlproxyController extends BaseController {
                 uid, page, limit, setId, eventId, keyword);
         LiveInfoResponse liveInfoResponse = llproxyService.liveInfo(uid, page, limit, setId, eventId, keyword);
         return ResponseEntity.ok(finish(liveInfoResponse));
+
+    }
+
+    @GetMapping("liveDetail")
+    public ResponseEntity<?> liveDetail(@Min(value = 1, message = "id") long id) {
+
+        log.info("liveDetail id: {}", id);
+        LiveDetailResponse liveDetailResponse = llproxyService.liveDetail(id);
+        return ResponseEntity.ok(finish(liveDetailResponse));
+
+    }
+
+    @GetMapping("liveUnitsExport")
+    public ResponseEntity<?> liveUnitsExport(@Min(value = 1, message = "id") long id) {
+
+        log.info("liveUnitsExport id: {}", id);
+        List<LLHelperUnit> llHelperUnitList = llproxyService.liveUnitsExport(id);
+        String members = JSON.toJSONString(llHelperUnitList);
+        InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(members.getBytes()));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment;filename=" + "unit-" + id + ".sd")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM).contentLength(members.getBytes().length)
+                .body(resource);
 
     }
 

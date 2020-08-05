@@ -141,6 +141,10 @@ public class Unit {
      */
     private String rarityString;
     /**
+     * 默认宝石容量
+     */
+    private Integer defaultRemovableSkillCapacity;
+    /**
      * 甜美属性
      */
     private Integer smileMax;

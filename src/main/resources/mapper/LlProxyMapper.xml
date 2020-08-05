@@ -65,6 +65,40 @@
         limit #{start}, #{limit}
     </select>
 
+    <select id="findLive" resultType="com.kotoumi.sifcapapi.model.vo.service.Live">
+        select play.*,
+               setting.*,
+               live_track_m.name,
+               live_track_m.title_asset,
+               live_track_m.sound_asset,
+               event_map.event_name
+        from (
+            select * from live_play where id = #{id}
+        ) play
+        left join (
+            (select live_difficulty_id, live_setting_id from normal_live_m)
+            union all
+            (select live_difficulty_id, live_setting_id from special_live_m)
+            union all
+            (select live_difficulty_id, live_setting_id from event_live_m)
+        ) live_difficulty
+        on play.live_difficulty_id = live_difficulty.live_difficulty_id
+        left join (
+            select live_setting_id,
+                   difficulty,
+                   stage_level,
+                   live_icon_asset,
+                   live_track_id
+            from live_setting_m
+        ) setting
+        on live_difficulty.live_setting_id = setting.live_setting_id
+        left join live_track_m
+        on setting.live_track_id = live_track_m.live_track_id
+        left join event_map
+        on play.event_id = event_map.event_id
+        limit 1
+    </select>
+
     <select id="countLive" resultType="Integer">
         select count(1)
         from (
@@ -113,7 +147,11 @@
                eponym,
                name,
                concat('/git/SIFStatic/icon/normal/', unit_number, '.png') as normal_icon_asset,
-               concat('/git/SIFStatic/icon/rankup/', unit_number, '.png') as rank_max_icon_asset
+               concat('/git/SIFStatic/icon/rankup/', unit_number, '.png') as rank_max_icon_asset,
+               default_removable_skill_capacity,
+               smile_max,
+               pure_max,
+               cool_max
         from unit_m
         <where>
             unit_id in
@@ -131,6 +169,7 @@
                unit_m.unit_number,
                concat('/git/SIFStatic/icon/normal/', unit_m.unit_number, '.png') as normal_icon_asset,
                concat('/git/SIFStatic/icon/rankup/', unit_m.unit_number, '.png') as rank_max_icon_asset,
+               unit_m.default_removable_skill_capacity,
                unit_m.smile_max,
                unit_m.pure_max,
                unit_m.cool_max
@@ -156,19 +195,20 @@
                unit_info.unit_number,
                unit_info.normal_icon_asset,
                unit_info.rank_max_icon_asset,
+               unit_info.default_removable_skill_capacity,
                unit_info.smile_max,
                unit_info.pure_max,
                unit_info.cool_max
         from (
-            select * from unit where user_id = #{userId}
-            <if test="back != 1">
-                and status = 'active'
+            select * from unit where user_id = #{userId} and (status = 'active'
+            <if test="back == 1">
+                or status = 'waiting'
             </if>
-        ) units
+        )) units
         inner join (
             select unit_id, unit_number, rarity, case rarity when 1 then 'N' when 2 then 'R' when 3 then 'SR' when 4 then 'UR' when 5 then 'SSR' else '' end as rarity_string,
                    eponym, name, concat('/git/SIFStatic/icon/normal/', unit_number, '.png') as normal_icon_asset,
-                   concat('/git/SIFStatic/icon/rankup/', unit_number, '.png') as rank_max_icon_asset, smile_max, pure_max, cool_max
+                   concat('/git/SIFStatic/icon/rankup/', unit_number, '.png') as rank_max_icon_asset, smile_max, pure_max, cool_max, default_removable_skill_capacity
             from unit_m
             where (rarity = 4
             <if test="ssr == 1">
@@ -186,11 +226,11 @@
     <select id="countUnits" resultType="Integer">
         select count(1)
         from (
-            select * from unit where user_id = #{userId}
-            <if test="back != 1">
-                and status = 'active'
+            select * from unit where user_id = #{userId} and (status = 'active'
+            <if test="back == 1">
+                or status = 'waiting'
             </if>
-        ) units
+        )) units
         inner join (
             select unit_id from unit_m
             where (rarity = 4
@@ -210,11 +250,11 @@
                units.unit_skill_level as skilllevel,
                units.unit_removable_skill_capacity as maxcost
         from (
-            select * from unit where user_id = #{userId}
-            <if test="back != 1">
-                and status = 'active'
+            select * from unit where user_id = #{userId}and (status = 'active'
+            <if test="back == 1">
+                or status = 'waiting'
             </if>
-        ) units
+        )) units
         inner join (
         select unit_id, unit_number from unit_m
         where (rarity = 4

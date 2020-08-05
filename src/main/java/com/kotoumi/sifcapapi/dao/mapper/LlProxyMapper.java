@@ -51,6 +51,13 @@ public interface LlProxyMapper {
                           @Param("keyword") String keyword);
 
     /**
+     * 查询演唱会信息
+     * @param id 演唱会ID
+     * @return 演唱会信息
+     */
+    Live findLive(@Param("id") long id);
+
+    /**
      * 演唱会信息总数
      * @param userId 用户ID
      * @param setId live_setting_id

@@ -2,6 +2,7 @@ package com.kotoumi.sifcapapi.service;
 
 import com.kotoumi.sifcapapi.model.vo.response.DeckInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
+import com.kotoumi.sifcapapi.model.vo.response.LiveDetailResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.response.SecretBoxLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.UnitsInfoResponse;
@@ -39,6 +40,20 @@ public interface LlproxyService {
      * @return 演唱会信息
      */
     LiveInfoResponse liveInfo(int uid, int page, int limit, Integer setId, Integer eventId, String keyword);
+
+    /**
+     * 获取演唱会信息
+     * @param id 演唱会id
+     * @return 演唱会信息
+     */
+    LiveDetailResponse liveDetail(long id);
+
+    /**
+     * 导出llhelper队伍信息
+     * @param id 演唱会id
+     * @return llhelper卡组信息
+     */
+    List<LLHelperUnit> liveUnitsExport(long id);
 
     /**
      * 获取抽卡记录

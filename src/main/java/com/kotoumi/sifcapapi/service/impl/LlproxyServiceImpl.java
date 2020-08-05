@@ -5,6 +5,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.kotoumi.sifcapapi.dao.mapper.LlProxyMapper;
 import com.kotoumi.sifcapapi.model.vo.response.DeckInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
+import com.kotoumi.sifcapapi.model.vo.response.LiveDetailResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.response.SecretBoxLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.UnitsInfoResponse;
@@ -56,9 +57,55 @@ public class LlproxyServiceImpl implements LlproxyService {
         List<Live> liveList = llProxyMapper.searchLive(uid, start, limit, setId, eventId, keyword);
         int liveCount = llProxyMapper.countLive(uid, setId, eventId, keyword);
         for (Live live : liveList) {
-            updateLiveInfo(live);
+            updateLiveInfo(live, false);
         }
         return new LiveInfoResponse(liveList, page, (liveCount - 1) / limit + 1, limit, liveCount);
+    }
+
+    @Override
+    public LiveDetailResponse liveDetail(long id) {
+        Live live = llProxyMapper.findLive(id);
+        if (live != null) {
+            updateLiveInfo(live, true);
+        }
+        return new LiveDetailResponse(live);
+    }
+
+    @Override
+    public List<LLHelperUnit> liveUnitsExport(long id) {
+        Live live = llProxyMapper.findLive(id);
+        if ((live != null) && (live.getUnitListJson() != null)) {
+            // 获取社员ID
+            List<Unit> unitList = JSON.parseObject(live.getUnitListJson(), new TypeReference<List<Unit>>() {});
+            List<Integer> unitIdList = new ArrayList<>();
+            for (Unit unit : unitList) {
+                unitIdList.add(unit.getUnitId());
+            }
+
+            // 初始化队伍信息
+            List<LLHelperUnit> llHelperUnitList = new ArrayList<>(9);
+            for (int i = 0; i < 9; i ++) {
+                llHelperUnitList.add(LLHelperUnit.getBlankUnit());
+            }
+            Map<Integer, Unit> unitMap = llProxyMapper.findUnits(unitIdList);
+            for (Unit unit : unitList) {
+                if (unitMap.containsKey(unit.getUnitId())) {
+                    Unit mappedUnit = unitMap.get(unit.getUnitId());
+                    LLHelperUnit llHelperUnit = new LLHelperUnit(
+                            mappedUnit.getUnitNumber(),
+                            unit.getIsRankMax() ? 1 : 0,
+                            unit.getUnitSkillLevel(),
+                            mappedUnit.getDefaultRemovableSkillCapacity(),
+                            mappedUnit.getSmileMax(),
+                            mappedUnit.getPureMax(),
+                            mappedUnit.getCoolMax()
+                    );
+                    llHelperUnitList.set(unit.getPosition() - 1, llHelperUnit);
+                }
+            }
+            return llHelperUnitList;
+        }
+        return Collections.emptyList();
     }
 
     @Override
@@ -178,24 +225,24 @@ public class LlproxyServiceImpl implements LlproxyService {
     private void updateUserInfo(List<User> userList) {
 
         // 获取成员ID信息，进行批量查询
-        List<Integer> unitList = new ArrayList<>();
+        List<Integer> unitIdList = new ArrayList<>();
         for (User user : userList) {
             user.setUid(user.getUserId());
             if (user.getNaviUnitInfoJson() != null) {
                 user.setNaviUnitInfo(JSON.parseObject(user.getNaviUnitInfoJson(), Unit.class));
                 user.setNaviUnitInfoJson(null);
-                unitList.add(user.getNaviUnitInfo().getUnitId());
+                unitIdList.add(user.getNaviUnitInfo().getUnitId());
             }
             if (user.getCenterUnitInfoJson() != null) {
                 user.setCenterUnitInfo(JSON.parseObject(user.getCenterUnitInfoJson(), Unit.class));
                 user.setCenterUnitInfoJson(null);
-                unitList.add(user.getCenterUnitInfo().getUnitId());
+                unitIdList.add(user.getCenterUnitInfo().getUnitId());
             }
         }
 
         // 查询数据库并更新用户信息
-        if (!unitList.isEmpty()) {
-            Map<Integer, Unit> unitMap = llProxyMapper.findUnits(unitList);
+        if (!unitIdList.isEmpty()) {
+            Map<Integer, Unit> unitMap = llProxyMapper.findUnits(unitIdList);
             for (User user: userList) {
                 if (user.getNaviUnitInfo() != null) {
                     if (unitMap.containsKey(user.getNaviUnitInfo().getUnitId())) {
@@ -225,11 +272,46 @@ public class LlproxyServiceImpl implements LlproxyService {
      * 更新live信息
      * @param live 演唱会
      */
-    private void updateLiveInfo(Live live) {
+    private void updateLiveInfo(Live live, boolean withUnit) {
         live.setFc((live.getGoodCnt() == 0) && (live.getBadCnt() == 0) && (live.getMissCnt() == 0));
         live.setAp(live.getFc() && live.getGreatCnt() == 0);
         live.setScore(live.getScoreSmile() + live.getScoreCute() + live.getScoreCool());
-        live.setUnitList(null);
+        if (withUnit && live.getUnitListJson() != null) {
+            // 获取社员ID
+            List<Unit> unitList = JSON.parseObject(live.getUnitListJson(), new TypeReference<List<Unit>>() {});
+            List<Integer> unitIdList = new ArrayList<>();
+            for (Unit unit : unitList) {
+                unitIdList.add(unit.getUnitId());
+            }
+
+            // 查询社员详细信息
+            List<Unit> resultUnitList = new ArrayList<>(9);
+            for (int i = 0; i < 9; i ++) {
+                resultUnitList.add(null);
+            }
+            if (!unitIdList.isEmpty()) {
+                Map<Integer, Unit> unitMap = llProxyMapper.findUnits(unitIdList);
+                for (Unit unit : unitList) {
+                    if (unitMap.containsKey(unit.getUnitId())) {
+                        Unit mappedUnit = unitMap.get(unit.getUnitId());
+                        unit.setUnitNumber(mappedUnit.getUnitNumber());
+                        unit.setEponym(mappedUnit.getEponym());
+                        unit.setName(mappedUnit.getName());
+                        unit.setNormalIconAsset(mappedUnit.getNormalIconAsset());
+                        unit.setRankMaxIconAsset(mappedUnit.getRankMaxIconAsset());
+                        if (unit.getIsRankMax()) {
+                            unit.setDisplayRank(2);
+                        } else {
+                            unit.setDisplayRank(1);
+                        }
+                    }
+                    resultUnitList.set(unit.getPosition() - 1, unit);
+                }
+            }
+            live.setUnitList(resultUnitList);
+        } else {
+            live.setUnitList(null);
+        }
         live.setUnitListJson(null);
         live.setUpdateTime(live.getPlayTime());
     }
