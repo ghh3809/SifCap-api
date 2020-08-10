@@ -26,10 +26,10 @@ public class TestMapper {
 
     @Test
     public void testMapper() {
-        User user = llProxyMapper.findUser(6669728);
+        User user = llProxyMapper.findUser(6669728, "cn");
         TestCase.assertNotNull(user);
         log.info(JSON.toJSONString(user));
-        List<User> userList = llProxyMapper.searchUser("697", 3);
+        List<User> userList = llProxyMapper.searchUser("697", 3, "cn");
         TestCase.assertFalse(userList.isEmpty());
         log.info(JSON.toJSONString(userList.get(0)));
     }

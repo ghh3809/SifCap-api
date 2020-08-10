@@ -35,45 +35,45 @@ public class LlproxyServiceImpl implements LlproxyService {
     private LlProxyMapper llProxyMapper;
 
     @Override
-    public List<User> userSearch(String keyword, int limit) {
+    public List<User> userSearch(String keyword, int limit, String lang) {
         // 基础信息
-        List<User> userList = llProxyMapper.searchUser(keyword, limit);
-        updateUserInfo(userList);
+        List<User> userList = llProxyMapper.searchUser(keyword, limit, lang);
+        updateUserInfo(userList, lang);
         return userList;
     }
 
     @Override
-    public User userInfo(int uid) {
-        User user = llProxyMapper.findUser(uid);
+    public User userInfo(int uid, String lang) {
+        User user = llProxyMapper.findUser(uid, lang);
         if (user != null) {
-            updateUserInfo(Collections.singletonList(user));
+            updateUserInfo(Collections.singletonList(user), lang);
         }
         return user;
     }
 
     @Override
-    public LiveInfoResponse liveInfo(int uid, int page, int limit, Integer setId, Integer eventId, String keyword) {
+    public LiveInfoResponse liveInfo(int uid, int page, int limit, Integer setId, Integer eventId, String keyword, String lang) {
         int start = limit * (page - 1);
-        List<Live> liveList = llProxyMapper.searchLive(uid, start, limit, setId, eventId, keyword);
-        int liveCount = llProxyMapper.countLive(uid, setId, eventId, keyword);
+        List<Live> liveList = llProxyMapper.searchLive(uid, start, limit, setId, eventId, keyword, lang);
+        int liveCount = llProxyMapper.countLive(uid, setId, eventId, keyword, lang);
         for (Live live : liveList) {
-            updateLiveInfo(live, false);
+            updateLiveInfo(live, false, lang);
         }
         return new LiveInfoResponse(liveList, page, (liveCount - 1) / limit + 1, limit, liveCount);
     }
 
     @Override
-    public LiveDetailResponse liveDetail(long id) {
-        Live live = llProxyMapper.findLive(id);
+    public LiveDetailResponse liveDetail(long id, String lang) {
+        Live live = llProxyMapper.findLive(id, lang);
         if (live != null) {
-            updateLiveInfo(live, true);
+            updateLiveInfo(live, true, lang);
         }
         return new LiveDetailResponse(live);
     }
 
     @Override
-    public List<LLHelperUnit> liveUnitsExport(long id) {
-        Live live = llProxyMapper.findLive(id);
+    public List<LLHelperUnit> liveUnitsExport(long id, String lang) {
+        Live live = llProxyMapper.findLive(id, "cn");
         if ((live != null) && (live.getUnitListJson() != null)) {
             // 获取社员ID
             List<Unit> unitList = JSON.parseObject(live.getUnitListJson(), new TypeReference<List<Unit>>() {});
@@ -87,7 +87,7 @@ public class LlproxyServiceImpl implements LlproxyService {
             for (int i = 0; i < 9; i ++) {
                 llHelperUnitList.add(LLHelperUnit.getBlankUnit());
             }
-            Map<Integer, Unit> unitMap = llProxyMapper.findUnits(unitIdList);
+            Map<Integer, Unit> unitMap = llProxyMapper.findUnits(unitIdList, lang);
             for (Unit unit : unitList) {
                 if (unitMap.containsKey(unit.getUnitId())) {
                     Unit mappedUnit = unitMap.get(unit.getUnitId());
@@ -109,36 +109,36 @@ public class LlproxyServiceImpl implements LlproxyService {
     }
 
     @Override
-    public SecretBoxLogResponse secretBoxLog(int uid, int page, int limit, Integer type) {
+    public SecretBoxLogResponse secretBoxLog(int uid, int page, int limit, Integer type, String lang) {
         int start = limit * (page - 1);
-        List<SecretBoxLog> secretBoxLogList = llProxyMapper.searchSecretBoxLog(uid, start, limit, type);
-        int secretBoxLogCount = llProxyMapper.countSecretBoxLog(uid, type);
+        List<SecretBoxLog> secretBoxLogList = llProxyMapper.searchSecretBoxLog(uid, start, limit, type, lang);
+        int secretBoxLogCount = llProxyMapper.countSecretBoxLog(uid, type, lang);
         for (SecretBoxLog secretBoxLog : secretBoxLogList) {
-            updateSecretBoxLogInfo(secretBoxLog);
+            updateSecretBoxLogInfo(secretBoxLog, lang);
         }
         return new SecretBoxLogResponse(secretBoxLogList, page, (secretBoxLogCount - 1) / limit + 1, limit, secretBoxLogCount);
     }
 
     @Override
-    public UnitsInfoResponse unitsInfo(int uid, int page, int limit, Integer ssr, Integer sr, Integer back) {
+    public UnitsInfoResponse unitsInfo(int uid, int page, int limit, Integer ssr, Integer sr, Integer back, String lang) {
         int start = limit * (page - 1);
-        List<Unit> unitList = llProxyMapper.searchUnits(uid, start, limit, ssr, sr, back);
-        int unitCount = llProxyMapper.countUnits(uid, ssr, sr, back);
+        List<Unit> unitList = llProxyMapper.searchUnits(uid, start, limit, ssr, sr, back, lang);
+        int unitCount = llProxyMapper.countUnits(uid, ssr, sr, back, lang);
         return new UnitsInfoResponse(unitList, page, (unitCount - 1) / limit + 1, limit, unitCount);
     }
 
     @Override
-    public List<LLHelperUnit> unitsExport(int uid, Integer ssr, Integer sr, Integer back) {
-        return llProxyMapper.exportUnits(uid, ssr, sr, back);
+    public List<LLHelperUnit> unitsExport(int uid, Integer ssr, Integer sr, Integer back, String lang) {
+        return llProxyMapper.exportUnits(uid, ssr, sr, back, lang);
     }
 
     @Override
-    public DeckInfoResponse deckInfo(int uid) {
+    public DeckInfoResponse deckInfo(int uid, String lang) {
 
         List<Long> unitOwningUserIdList = new ArrayList<>();
 
         // 获取社员ID
-        List<Deck> deckList = llProxyMapper.findDecks(uid, null);
+        List<Deck> deckList = llProxyMapper.findDecks(uid, null, lang);
         for (Deck deck : deckList) {
             List<Unit> unitDeckDetail = JSON.parseObject(deck.getUnitDeckDetailJson(), new TypeReference<List<Unit>>() {});
             deck.setUnitDeckDetailJson(null);
@@ -152,7 +152,7 @@ public class LlproxyServiceImpl implements LlproxyService {
 
         // 查询社员详细信息
         if (!unitOwningUserIdList.isEmpty()) {
-            Map<Long, Unit> unitMap = llProxyMapper.findUnitsByOwningIds(uid, unitOwningUserIdList);
+            Map<Long, Unit> unitMap = llProxyMapper.findUnitsByOwningIds(uid, unitOwningUserIdList, lang);
             for (Deck deck : deckList) {
                 List<Unit> unitDeckDetail = deck.getUnits();
                 // 初始化队伍信息
@@ -173,8 +173,8 @@ public class LlproxyServiceImpl implements LlproxyService {
     }
 
     @Override
-    public List<LLHelperUnit> deckExport(int uid, int unitDeckId) {
-        List<Deck> deckList = llProxyMapper.findDecks(uid, unitDeckId);
+    public List<LLHelperUnit> deckExport(int uid, int unitDeckId, String lang) {
+        List<Deck> deckList = llProxyMapper.findDecks(uid, unitDeckId, lang);
         if (!deckList.isEmpty()) {
 
             List<Long> unitOwningUserIdList = new ArrayList<>();
@@ -191,7 +191,7 @@ public class LlproxyServiceImpl implements LlproxyService {
 
             // 查询社员详细信息
             if (!unitOwningUserIdList.isEmpty()) {
-                Map<Long, Unit> unitMap = llProxyMapper.findUnitsByOwningIds(uid, unitOwningUserIdList);
+                Map<Long, Unit> unitMap = llProxyMapper.findUnitsByOwningIds(uid, unitOwningUserIdList, lang);
                 // 初始化队伍信息
                 List<LLHelperUnit> llHelperUnitList = new ArrayList<>(9);
                 for (int i = 0; i < 9; i ++) {
@@ -221,8 +221,9 @@ public class LlproxyServiceImpl implements LlproxyService {
     /**
      * 更新用户信息
      * @param userList 用户信息列表
+     * @param lang 数据语音
      */
-    private void updateUserInfo(List<User> userList) {
+    private void updateUserInfo(List<User> userList, String lang) {
 
         // 获取成员ID信息，进行批量查询
         List<Integer> unitIdList = new ArrayList<>();
@@ -242,7 +243,7 @@ public class LlproxyServiceImpl implements LlproxyService {
 
         // 查询数据库并更新用户信息
         if (!unitIdList.isEmpty()) {
-            Map<Integer, Unit> unitMap = llProxyMapper.findUnits(unitIdList);
+            Map<Integer, Unit> unitMap = llProxyMapper.findUnits(unitIdList, lang);
             for (User user: userList) {
                 if (user.getNaviUnitInfo() != null) {
                     if (unitMap.containsKey(user.getNaviUnitInfo().getUnitId())) {
@@ -271,8 +272,9 @@ public class LlproxyServiceImpl implements LlproxyService {
     /**
      * 更新live信息
      * @param live 演唱会
+     * @param lang 数据语音
      */
-    private void updateLiveInfo(Live live, boolean withUnit) {
+    private void updateLiveInfo(Live live, boolean withUnit, String lang) {
         live.setFc((live.getGoodCnt() == 0) && (live.getBadCnt() == 0) && (live.getMissCnt() == 0));
         live.setAp(live.getFc() && live.getGreatCnt() == 0);
         live.setScore(live.getScoreSmile() + live.getScoreCute() + live.getScoreCool());
@@ -290,7 +292,7 @@ public class LlproxyServiceImpl implements LlproxyService {
                 resultUnitList.add(null);
             }
             if (!unitIdList.isEmpty()) {
-                Map<Integer, Unit> unitMap = llProxyMapper.findUnits(unitIdList);
+                Map<Integer, Unit> unitMap = llProxyMapper.findUnits(unitIdList, lang);
                 for (Unit unit : unitList) {
                     if (unitMap.containsKey(unit.getUnitId())) {
                         Unit mappedUnit = unitMap.get(unit.getUnitId());
@@ -319,8 +321,9 @@ public class LlproxyServiceImpl implements LlproxyService {
     /**
      * 更新live信息
      * @param secretBoxLog 演唱会
+     * @param lang 数据语音
      */
-    private void updateSecretBoxLogInfo(SecretBoxLog secretBoxLog) {
+    private void updateSecretBoxLogInfo(SecretBoxLog secretBoxLog, String lang) {
         secretBoxLog.setUnits(JSON.parseObject(secretBoxLog.getUnitsJson(), new TypeReference<List<Unit>>() {}));
         secretBoxLog.setUnitsJson(null);
     }

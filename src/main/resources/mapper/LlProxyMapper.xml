@@ -19,9 +19,9 @@
     <select id="searchLive" resultType="com.kotoumi.sifcapapi.model.vo.service.Live">
         select play.*,
                setting.*,
-               live_track_m.name,
-               live_track_m.title_asset,
-               live_track_m.sound_asset,
+               live_track_m_${lang}.name,
+               live_track_m_${lang}.title_asset,
+               live_track_m_${lang}.sound_asset,
                event_map.event_name
         from (
             select * from live_play where user_id = #{userId}
@@ -30,9 +30,9 @@
             </if>
         ) play
         left join (
-            (select live_difficulty_id, live_setting_id from normal_live_m)
+            (select live_difficulty_id, live_setting_id from normal_live_m_${lang})
             union all
-            (select live_difficulty_id, live_setting_id from special_live_m)
+            (select live_difficulty_id, live_setting_id from special_live_m_${lang})
             union all
             (select live_difficulty_id, live_setting_id from event_live_m)
         ) live_difficulty
@@ -43,14 +43,14 @@
                    stage_level,
                    live_icon_asset,
                    live_track_id
-            from live_setting_m
+            from live_setting_m_${lang}
             <if test="setId != null">
                 where live_setting_id = #{setId}
             </if>
         ) setting
         on live_difficulty.live_setting_id = setting.live_setting_id
-        left join live_track_m
-        on setting.live_track_id = live_track_m.live_track_id
+        left join live_track_m_${lang}
+        on setting.live_track_id = live_track_m_${lang}.live_track_id
         left join event_map
         on play.event_id = event_map.event_id
         <where>
@@ -58,7 +58,7 @@
                 live_difficulty.live_setting_id = #{setId}
             </if>
             <if test="keyword != null">
-                and (live_track_m.name like "%"#{keyword}"%" or event_map.event_name like "%"#{keyword}"%")
+                and (live_track_m_${lang}.name like "%"#{keyword}"%" or event_map.event_name like "%"#{keyword}"%")
             </if>
         </where>
         order by play.id desc
@@ -68,17 +68,17 @@
     <select id="findLive" resultType="com.kotoumi.sifcapapi.model.vo.service.Live">
         select play.*,
                setting.*,
-               live_track_m.name,
-               live_track_m.title_asset,
-               live_track_m.sound_asset,
+               live_track_m_${lang}.name,
+               live_track_m_${lang}.title_asset,
+               live_track_m_${lang}.sound_asset,
                event_map.event_name
         from (
             select * from live_play where id = #{id}
         ) play
         left join (
-            (select live_difficulty_id, live_setting_id from normal_live_m)
+            (select live_difficulty_id, live_setting_id from normal_live_m_${lang})
             union all
-            (select live_difficulty_id, live_setting_id from special_live_m)
+            (select live_difficulty_id, live_setting_id from special_live_m_${lang})
             union all
             (select live_difficulty_id, live_setting_id from event_live_m)
         ) live_difficulty
@@ -89,11 +89,11 @@
                    stage_level,
                    live_icon_asset,
                    live_track_id
-            from live_setting_m
+            from live_setting_m_${lang}
         ) setting
         on live_difficulty.live_setting_id = setting.live_setting_id
-        left join live_track_m
-        on setting.live_track_id = live_track_m.live_track_id
+        left join live_track_m_${lang}
+        on setting.live_track_id = live_track_m_${lang}.live_track_id
         left join event_map
         on play.event_id = event_map.event_id
         limit 1
@@ -108,9 +108,9 @@
             </if>
         ) play
         left join (
-            (select live_difficulty_id, live_setting_id from normal_live_m)
+            (select live_difficulty_id, live_setting_id from normal_live_m_${lang})
             union all
-            (select live_difficulty_id, live_setting_id from special_live_m)
+            (select live_difficulty_id, live_setting_id from special_live_m_${lang})
             union all
             (select live_difficulty_id, live_setting_id from event_live_m)
         ) live_difficulty
@@ -121,14 +121,14 @@
                    stage_level,
                    live_icon_asset,
                    live_track_id
-            from live_setting_m
+            from live_setting_m_${lang}
             <if test="setId != null">
                 where live_setting_id = #{setId}
             </if>
         ) setting
             on live_difficulty.live_setting_id = setting.live_setting_id
-            left join live_track_m
-            on setting.live_track_id = live_track_m.live_track_id
+            left join live_track_m_${lang}
+            on setting.live_track_id = live_track_m_${lang}.live_track_id
             left join event_map
             on play.event_id = event_map.event_id
         <where>
@@ -136,7 +136,7 @@
                 live_difficulty.live_setting_id = #{setId}
             </if>
             <if test="keyword != null">
-                and (live_track_m.name like "%"#{keyword}"%" or event_map.event_name like "%"#{keyword}"%")
+                and (live_track_m_${lang}.name like "%"#{keyword}"%" or event_map.event_name like "%"#{keyword}"%")
             </if>
         </where>
     </select>
@@ -152,7 +152,7 @@
                smile_max,
                pure_max,
                cool_max
-        from unit_m
+        from unit_m_${lang}
         <where>
             unit_id in
             <foreach collection="unitList" item="unitId" index="index" open="(" close=")" separator=",">
@@ -209,7 +209,7 @@
             select unit_id, unit_number, rarity, case rarity when 1 then 'N' when 2 then 'R' when 3 then 'SR' when 4 then 'UR' when 5 then 'SSR' else '' end as rarity_string,
                    eponym, name, concat('/git/SIFStatic/icon/normal/', unit_number, '.png') as normal_icon_asset,
                    concat('/git/SIFStatic/icon/rankup/', unit_number, '.png') as rank_max_icon_asset, smile_max, pure_max, cool_max, default_removable_skill_capacity
-            from unit_m
+            from unit_m_${lang}
             where (rarity = 4
             <if test="ssr == 1">
                 or rarity = 5
@@ -232,7 +232,7 @@
             </if>
         )) units
         inner join (
-            select unit_id from unit_m
+            select unit_id from unit_m_${lang}
             where (rarity = 4
             <if test="ssr == 1">
                 or rarity = 5
@@ -250,13 +250,13 @@
                units.unit_skill_level as skilllevel,
                units.unit_removable_skill_capacity as maxcost
         from (
-            select * from unit where user_id = #{userId}and (status = 'active'
+            select * from unit where user_id = #{userId} and (status = 'active'
             <if test="back == 1">
                 or status = 'waiting'
             </if>
         )) units
         inner join (
-        select unit_id, unit_number from unit_m
+        select unit_id, unit_number from unit_m_${lang}
         where (rarity = 4
             <if test="ssr == 1">
                 or rarity = 5
@@ -304,7 +304,7 @@
                    concat('/git/SIFStatic/icon/normal/', unit_number, '.png') as normal_icon_asset,
                    concat('/git/SIFStatic/icon/rankup/', unit_number, '.png') as rank_max_icon_asset,
                    rarity
-            from unit_m
+            from unit_m_${lang}
         ) unit_info
         on box.unit_id = unit_info.unit_id
         group by box.user_id, box.secret_box_id, box.name, box.pon_time
