@@ -79,10 +79,11 @@ public interface LlproxyService {
      * @param ssr 是否包含ssr
      * @param sr 是否包含sr
      * @param back 是否包含预备教室成员
+     * @param islive 是否live成员模式
      * @param lang 数据语音
      * @return 抽卡记录
      */
-    UnitsInfoResponse unitsInfo(int uid, int page, int limit, Integer ssr, Integer sr, Integer back, String lang);
+    UnitsInfoResponse unitsInfo(int uid, int page, int limit, Integer ssr, Integer sr, Integer back, Integer islive, String lang);
 
     /**
      * 导出llhelper卡组信息
@@ -90,10 +91,11 @@ public interface LlproxyService {
      * @param ssr 是否包含ssr
      * @param sr 是否包含sr
      * @param back 是否包含预备教室成员
+     * @param islive 是否live成员模式
      * @param lang 数据语音
      * @return llhelper卡组信息
      */
-    List<LLHelperUnit> unitsExport(int uid, Integer ssr, Integer sr, Integer back, String lang);
+    List<LLHelperUnit> unitsExport(int uid, Integer ssr, Integer sr, Integer back, Integer islive, String lang);
 
     /**
      * 获取队伍信息
@@ -101,7 +103,7 @@ public interface LlproxyService {
      * @param lang 数据语音
      * @return 抽卡记录
      */
-    DeckInfoResponse deckInfo(int uid, String lang);
+    DeckInfoResponse deckInfo(int uid, Integer islive, String lang);
 
     /**
      * 导出llhelper队伍信息
@@ -110,6 +112,6 @@ public interface LlproxyService {
      * @param lang 数据语音
      * @return llhelper卡组信息
      */
-    List<LLHelperUnit> deckExport(int uid, int unitDeckId, String lang);
+    List<LLHelperUnit> deckExport(int uid, int unitDeckId, Integer islive, String lang);
 
 }

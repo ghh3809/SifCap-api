@@ -147,14 +147,15 @@ public class LlproxyController extends BaseController {
                                        @RequestParam(name = "ssr", required = false) Integer ssr,
                                        @RequestParam(name = "sr", required = false) Integer sr,
                                        @RequestParam(name = "back", required = false) Integer back,
+                                       @RequestParam(name = "islive", required = false) Integer islive,
                                        @RequestParam(name = "lang", required = false) String lang) {
 
-        log.info("unitsInfo uid: {}, page: {}, limit: {}, ssr: {}, sr: {}, back: {}, lang: {}",
-                uid, page, limit, ssr, sr, back, lang);
+        log.info("unitsInfo uid: {}, page: {}, limit: {}, ssr: {}, sr: {}, back: {}, islive: {}, lang: {}",
+                uid, page, limit, ssr, sr, back, islive, lang);
         if (StringUtils.isBlank(lang)) {
             lang = "CN";
         }
-        UnitsInfoResponse unitsInfoResponse = llproxyService.unitsInfo(uid, page, limit, ssr, sr, back, lang.toLowerCase());
+        UnitsInfoResponse unitsInfoResponse = llproxyService.unitsInfo(uid, page, limit, ssr, sr, back, islive, lang.toLowerCase());
         return ResponseEntity.ok(finish(unitsInfoResponse));
 
     }
@@ -164,13 +165,14 @@ public class LlproxyController extends BaseController {
                                          @RequestParam(name = "ssr", required = false) Integer ssr,
                                          @RequestParam(name = "sr", required = false) Integer sr,
                                          @RequestParam(name = "back", required = false) Integer back,
+                                         @RequestParam(name = "islive", required = false) Integer islive,
                                          @RequestParam(name = "lang", required = false) String lang) {
 
-        log.info("unitsExport uid: {}, ssr: {}, sr: {}, back: {}, lang: {}", uid, ssr, sr, back, lang);
+        log.info("unitsExport uid: {}, ssr: {}, sr: {}, back: {}, islive: {}, lang: {}", uid, ssr, sr, back, islive, lang);
         if (StringUtils.isBlank(lang)) {
             lang = "CN";
         }
-        List<LLHelperUnit> llHelperUnitList = llproxyService.unitsExport(uid, ssr, sr, back, lang.toLowerCase());
+        List<LLHelperUnit> llHelperUnitList = llproxyService.unitsExport(uid, ssr, sr, back, islive, lang.toLowerCase());
         String members = String.format("{\"version\":103,\"team\":[],\"gemstock\":{},\"submember\":%s}",
                 JSON.toJSONString(llHelperUnitList));
         InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(members.getBytes()));
@@ -184,13 +186,14 @@ public class LlproxyController extends BaseController {
 
     @GetMapping("deckInfo")
     public ResponseEntity<?> deckInfo(@Min(value = 1, message = "uid") int uid,
+                                      @RequestParam(name = "islive", required = false) Integer islive,
                                       @RequestParam(name = "lang", required = false) String lang) {
 
-        log.info("deckInfo uid: {}, lang: {}", uid, lang);
+        log.info("deckInfo uid: {}, islive: {}, lang: {}", uid, islive, lang);
         if (StringUtils.isBlank(lang)) {
             lang = "CN";
         }
-        DeckInfoResponse deckInfoResponse = llproxyService.deckInfo(uid, lang.toLowerCase());
+        DeckInfoResponse deckInfoResponse = llproxyService.deckInfo(uid, islive, lang.toLowerCase());
         return ResponseEntity.ok(finish(deckInfoResponse));
 
     }
@@ -198,13 +201,14 @@ public class LlproxyController extends BaseController {
     @GetMapping("deckExport")
     public ResponseEntity<?> deckExport(@Min(value = 1, message = "uid") int uid,
                                         @Range(min = 1, max = 18) int unitDeckId,
+                                        @RequestParam(name = "islive", required = false) Integer islive,
                                         @RequestParam(name = "lang", required = false) String lang) {
 
-        log.info("deckExport uid: {}, unitDeckId: {}, lang: {}", uid, unitDeckId, lang);
+        log.info("deckExport uid: {}, unitDeckId: {}, islive: {}, lang: {}", uid, unitDeckId, islive, lang);
         if (StringUtils.isBlank(lang)) {
             lang = "CN";
         }
-        List<LLHelperUnit> llHelperUnitList = llproxyService.deckExport(uid, unitDeckId, lang.toLowerCase());
+        List<LLHelperUnit> llHelperUnitList = llproxyService.deckExport(uid, unitDeckId, islive, lang.toLowerCase());
         String members = JSON.toJSONString(llHelperUnitList);
         InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(members.getBytes()));
         return ResponseEntity.ok()

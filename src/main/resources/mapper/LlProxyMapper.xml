@@ -146,8 +146,8 @@
                unit_number,
                eponym,
                name,
-               concat('/git/SIFStatic/icon/normal/', unit_number, '.png') as normal_icon_asset,
-               concat('/git/SIFStatic/icon/rankup/', unit_number, '.png') as rank_max_icon_asset,
+               IF(unit_number >= 10000, normal_icon_asset, concat('/git/SIFStatic/icon/normal/', unit_number, '.png')) as normal_icon_asset,
+               IF(unit_number >= 10000, rank_max_icon_asset, concat('/git/SIFStatic/icon/rankup/', unit_number, '.png')) as rank_max_icon_asset,
                default_removable_skill_capacity,
                smile_max,
                pure_max,
@@ -163,16 +163,16 @@
 
     <select id="findUnitsByOwningIds" resultType="com.kotoumi.sifcapapi.model.vo.service.Unit">
         select unit_list.*,
-               unit_m.rarity,
-               unit_m.eponym,
-               unit_m.name,
-               unit_m.unit_number,
-               concat('/git/SIFStatic/icon/normal/', unit_m.unit_number, '.png') as normal_icon_asset,
-               concat('/git/SIFStatic/icon/rankup/', unit_m.unit_number, '.png') as rank_max_icon_asset,
-               unit_m.default_removable_skill_capacity,
-               unit_m.smile_max,
-               unit_m.pure_max,
-               unit_m.cool_max
+               unit_m_${lang}.rarity,
+               unit_m_${lang}.eponym,
+               unit_m_${lang}.name,
+               unit_m_${lang}.unit_number,
+               IF(unit_m_${lang}.unit_number >= 10000, unit_m_${lang}.normal_icon_asset, concat('/git/SIFStatic/icon/normal/', unit_m_${lang}.unit_number, '.png')) as normal_icon_asset,
+               IF(unit_m_${lang}.unit_number >= 10000, unit_m_${lang}.rank_max_icon_asset, concat('/git/SIFStatic/icon/rankup/', unit_m_${lang}.unit_number, '.png')) as rank_max_icon_asset,
+               unit_m_${lang}.default_removable_skill_capacity,
+               unit_m_${lang}.smile_max,
+               unit_m_${lang}.pure_max,
+               unit_m_${lang}.cool_max
         from (
             select * from unit
             <where>user_id = #{userId} and unit_owning_user_id in
@@ -180,10 +180,18 @@
                     collection="unitList" item="unitId" index="index" open="(" close=")" separator=",">
                     #{unitId}
                 </foreach>
+                <choose>
+                    <when test="islive == 1">
+                        and status = 'deck'
+                    </when>
+                    <otherwise>
+                        and (status = 'active' or status = 'waiting')
+                    </otherwise>
+                </choose>
             </where>
         ) unit_list
-        inner join unit_m
-        on unit_list.unit_id = unit_m.unit_id
+        inner join unit_m_${lang}
+        on unit_list.unit_id = unit_m_${lang}.unit_id
     </select>
 
     <select id="searchUnits" resultType="com.kotoumi.sifcapapi.model.vo.service.Unit">
@@ -200,15 +208,24 @@
                unit_info.pure_max,
                unit_info.cool_max
         from (
-            select * from unit where user_id = #{userId} and (status = 'active'
-            <if test="back == 1">
-                or status = 'waiting'
-            </if>
+            select * from unit where user_id = #{userId} and (
+                <choose>
+                    <when test="islive == 1">
+                        status = 'deck' and update_time > CURRENT_TIMESTAMP - INTERVAL 30 DAY
+                    </when>
+                    <otherwise>
+                        status = 'active'
+                        <if test="back == 1">
+                            or status = 'waiting'
+                        </if>
+                    </otherwise>
+                </choose>
         )) units
         inner join (
             select unit_id, unit_number, rarity, case rarity when 1 then 'N' when 2 then 'R' when 3 then 'SR' when 4 then 'UR' when 5 then 'SSR' else '' end as rarity_string,
-                   eponym, name, concat('/git/SIFStatic/icon/normal/', unit_number, '.png') as normal_icon_asset,
-                   concat('/git/SIFStatic/icon/rankup/', unit_number, '.png') as rank_max_icon_asset, smile_max, pure_max, cool_max, default_removable_skill_capacity
+                   eponym, name, IF(unit_number >= 10000, normal_icon_asset, concat('/git/SIFStatic/icon/normal/', unit_number, '.png')) as normal_icon_asset,
+                   IF(unit_number >= 10000, rank_max_icon_asset, concat('/git/SIFStatic/icon/rankup/', unit_number, '.png')) as rank_max_icon_asset,
+                   smile_max, pure_max, cool_max, default_removable_skill_capacity
             from unit_m_${lang}
             where (rarity = 4
             <if test="ssr == 1">
@@ -226,10 +243,18 @@
     <select id="countUnits" resultType="Integer">
         select count(1)
         from (
-            select * from unit where user_id = #{userId} and (status = 'active'
-            <if test="back == 1">
-                or status = 'waiting'
-            </if>
+            select * from unit where user_id = #{userId} and (
+        <choose>
+            <when test="islive == 1">
+                status = 'deck' and update_time > CURRENT_TIMESTAMP - INTERVAL 30 DAY
+            </when>
+            <otherwise>
+                status = 'active'
+                <if test="back == 1">
+                    or status = 'waiting'
+                </if>
+            </otherwise>
+        </choose>
         )) units
         inner join (
             select unit_id from unit_m_${lang}
@@ -250,10 +275,18 @@
                units.unit_skill_level as skilllevel,
                units.unit_removable_skill_capacity as maxcost
         from (
-            select * from unit where user_id = #{userId} and (status = 'active'
-            <if test="back == 1">
-                or status = 'waiting'
-            </if>
+            select * from unit where user_id = #{userId} and (
+        <choose>
+            <when test="islive == 1">
+                status = 'deck' and update_time > CURRENT_TIMESTAMP - INTERVAL 30 DAY
+            </when>
+            <otherwise>
+                status = 'active'
+                <if test="back == 1">
+                    or status = 'waiting'
+                </if>
+            </otherwise>
+        </choose>
         )) units
         inner join (
         select unit_id, unit_number from unit_m_${lang}
@@ -301,8 +334,8 @@
                    unit_number,
                    eponym,
                    name,
-                   concat('/git/SIFStatic/icon/normal/', unit_number, '.png') as normal_icon_asset,
-                   concat('/git/SIFStatic/icon/rankup/', unit_number, '.png') as rank_max_icon_asset,
+                   IF(unit_number >= 10000, normal_icon_asset, concat('/git/SIFStatic/icon/normal/', unit_number, '.png')) as normal_icon_asset,
+                   IF(unit_number >= 10000, rank_max_icon_asset, concat('/git/SIFStatic/icon/rankup/', unit_number, '.png')) as rank_max_icon_asset,
                    rarity
             from unit_m_${lang}
         ) unit_info

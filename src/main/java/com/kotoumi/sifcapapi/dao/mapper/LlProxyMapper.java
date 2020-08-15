@@ -94,12 +94,14 @@ public interface LlProxyMapper {
      * 根据unitOwningUserId列表寻找卡牌信息
      * @param userId 用户ID
      * @param unitList unitOwningList列表
+     * @param islive 是否是live社员模式
      * @param lang 数据语言
      * @return 卡牌信息
      */
     @MapKey("unitOwningUserId")
     Map<Long, Unit> findUnitsByOwningIds(@Param("userId") Integer userId,
                                          @Param("unitList") List<Long> unitList,
+                                         @Param("islive") Integer islive,
                                          @Param("lang") String lang);
 
     /**
@@ -110,6 +112,7 @@ public interface LlProxyMapper {
      * @param ssr 是否包含ssr
      * @param sr 是否包含sr
      * @param back 是否包含预备教室成员
+     * @param live 是否live成员模式
      * @param lang 数据语言
      * @return 卡组信息
      */
@@ -119,6 +122,7 @@ public interface LlProxyMapper {
                            @Param("ssr") Integer ssr,
                            @Param("sr") Integer sr,
                            @Param("back") Integer back,
+                           @Param("islive") Integer live,
                            @Param("lang") String lang);
 
     /**
@@ -127,6 +131,7 @@ public interface LlProxyMapper {
      * @param ssr 是否包含ssr
      * @param sr 是否包含sr
      * @param back 是否包含预备教室成员
+     * @param live 是否live成员模式
      * @param lang 数据语言
      * @return 卡组总数
      */
@@ -134,6 +139,7 @@ public interface LlProxyMapper {
                    @Param("ssr") Integer ssr,
                    @Param("sr") Integer sr,
                    @Param("back") Integer back,
+                   @Param("islive") Integer live,
                    @Param("lang") String lang);
 
     /**
@@ -142,6 +148,7 @@ public interface LlProxyMapper {
      * @param ssr 是否包含ssr
      * @param sr 是否包含sr
      * @param back 是否包含预备教室成员
+     * @param live 是否live成员模式
      * @param lang 数据语言
      * @return llhelper卡组信息
      */
@@ -149,6 +156,7 @@ public interface LlProxyMapper {
                                    @Param("ssr") Integer ssr,
                                    @Param("sr") Integer sr,
                                    @Param("back") Integer back,
+                                   @Param("islive") Integer live,
                                    @Param("lang") String lang);
 
     /**

@@ -113,6 +113,10 @@ public class Unit {
      */
     private Boolean isRankMax;
     /**
+     * 数据更新时间
+     */
+    private String updateTime;
+    /**
      * 成员名称
      */
     private String eponym;

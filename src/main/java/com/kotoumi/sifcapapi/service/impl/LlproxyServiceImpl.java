@@ -120,20 +120,20 @@ public class LlproxyServiceImpl implements LlproxyService {
     }
 
     @Override
-    public UnitsInfoResponse unitsInfo(int uid, int page, int limit, Integer ssr, Integer sr, Integer back, String lang) {
+    public UnitsInfoResponse unitsInfo(int uid, int page, int limit, Integer ssr, Integer sr, Integer back, Integer islive, String lang) {
         int start = limit * (page - 1);
-        List<Unit> unitList = llProxyMapper.searchUnits(uid, start, limit, ssr, sr, back, lang);
-        int unitCount = llProxyMapper.countUnits(uid, ssr, sr, back, lang);
+        List<Unit> unitList = llProxyMapper.searchUnits(uid, start, limit, ssr, sr, back, islive, lang);
+        int unitCount = llProxyMapper.countUnits(uid, ssr, sr, back, islive, lang);
         return new UnitsInfoResponse(unitList, page, (unitCount - 1) / limit + 1, limit, unitCount);
     }
 
     @Override
-    public List<LLHelperUnit> unitsExport(int uid, Integer ssr, Integer sr, Integer back, String lang) {
-        return llProxyMapper.exportUnits(uid, ssr, sr, back, lang);
+    public List<LLHelperUnit> unitsExport(int uid, Integer ssr, Integer sr, Integer back, Integer islive, String lang) {
+        return llProxyMapper.exportUnits(uid, ssr, sr, back, islive, lang);
     }
 
     @Override
-    public DeckInfoResponse deckInfo(int uid, String lang) {
+    public DeckInfoResponse deckInfo(int uid, Integer islive, String lang) {
 
         List<Long> unitOwningUserIdList = new ArrayList<>();
 
@@ -152,7 +152,7 @@ public class LlproxyServiceImpl implements LlproxyService {
 
         // 查询社员详细信息
         if (!unitOwningUserIdList.isEmpty()) {
-            Map<Long, Unit> unitMap = llProxyMapper.findUnitsByOwningIds(uid, unitOwningUserIdList, lang);
+            Map<Long, Unit> unitMap = llProxyMapper.findUnitsByOwningIds(uid, unitOwningUserIdList, islive, lang);
             for (Deck deck : deckList) {
                 List<Unit> unitDeckDetail = deck.getUnits();
                 // 初始化队伍信息
@@ -173,7 +173,7 @@ public class LlproxyServiceImpl implements LlproxyService {
     }
 
     @Override
-    public List<LLHelperUnit> deckExport(int uid, int unitDeckId, String lang) {
+    public List<LLHelperUnit> deckExport(int uid, int unitDeckId, Integer islive, String lang) {
         List<Deck> deckList = llProxyMapper.findDecks(uid, unitDeckId, lang);
         if (!deckList.isEmpty()) {
 
@@ -191,7 +191,7 @@ public class LlproxyServiceImpl implements LlproxyService {
 
             // 查询社员详细信息
             if (!unitOwningUserIdList.isEmpty()) {
-                Map<Long, Unit> unitMap = llProxyMapper.findUnitsByOwningIds(uid, unitOwningUserIdList, lang);
+                Map<Long, Unit> unitMap = llProxyMapper.findUnitsByOwningIds(uid, unitOwningUserIdList, islive, lang);
                 // 初始化队伍信息
                 List<LLHelperUnit> llHelperUnitList = new ArrayList<>(9);
                 for (int i = 0; i < 9; i ++) {
