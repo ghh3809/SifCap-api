@@ -2,11 +2,14 @@ package com.kotoumi.sifcapapi.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.kotoumi.sifcapapi.model.vo.response.DeckInfoResponse;
+import com.kotoumi.sifcapapi.model.vo.response.EffortBoxLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
 import com.kotoumi.sifcapapi.model.vo.response.LiveDetailResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.response.SecretBoxLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.UnitsInfoResponse;
+import com.kotoumi.sifcapapi.model.vo.service.EffortBox;
+import com.kotoumi.sifcapapi.model.vo.service.Reward;
 import com.kotoumi.sifcapapi.model.vo.service.SecretBoxLog;
 import com.kotoumi.sifcapapi.model.vo.service.Unit;
 import com.kotoumi.sifcapapi.model.vo.service.User;
@@ -216,6 +219,22 @@ public class LlproxyController extends BaseController {
                         "attachment;filename=" + "unit-" + uid + "-" + unitDeckId + ".sd")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM).contentLength(members.getBytes().length)
                 .body(resource);
+
+    }
+
+    @GetMapping("effortBoxLog")
+    public ResponseEntity<?> effortBoxLog(@Min(value = 1, message = "uid") int uid,
+                                          @Min(value = 1, message = "page") int page,
+                                          @Min(value = 1, message = "limit") int limit,
+                                          @RequestParam(name = "limited", required = false) Integer limited,
+                                          @RequestParam(name = "lang", required = false) String lang) {
+
+        log.info("secretBoxLog uid: {}, page: {}, limit: {}, limited: {}, lang: {}", uid, page, limit, limited, lang);
+        if (StringUtils.isBlank(lang)) {
+            lang = "CN";
+        }
+        EffortBoxLogResponse effortBoxLogResponse = llproxyService.effortBoxLog(uid, page, limit, limited, lang.toLowerCase());
+        return ResponseEntity.ok(finish(effortBoxLogResponse));
 
     }
 

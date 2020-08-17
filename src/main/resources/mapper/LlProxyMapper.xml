@@ -146,8 +146,8 @@
                unit_number,
                eponym,
                name,
-               IF(unit_number >= 10000, normal_icon_asset, concat('/git/SIFStatic/icon/normal/', unit_number, '.png')) as normal_icon_asset,
-               IF(unit_number >= 10000, rank_max_icon_asset, concat('/git/SIFStatic/icon/rankup/', unit_number, '.png')) as rank_max_icon_asset,
+               IF(unit_number >= 10000, normal_icon_asset, concat('git/SIFStatic/icon/normal/', unit_number, '.png')) as normal_icon_asset,
+               IF(unit_number >= 10000, rank_max_icon_asset, concat('git/SIFStatic/icon/rankup/', unit_number, '.png')) as rank_max_icon_asset,
                default_removable_skill_capacity,
                smile_max,
                pure_max,
@@ -167,8 +167,8 @@
                unit_m_${lang}.eponym,
                unit_m_${lang}.name,
                unit_m_${lang}.unit_number,
-               IF(unit_m_${lang}.unit_number >= 10000, unit_m_${lang}.normal_icon_asset, concat('/git/SIFStatic/icon/normal/', unit_m_${lang}.unit_number, '.png')) as normal_icon_asset,
-               IF(unit_m_${lang}.unit_number >= 10000, unit_m_${lang}.rank_max_icon_asset, concat('/git/SIFStatic/icon/rankup/', unit_m_${lang}.unit_number, '.png')) as rank_max_icon_asset,
+               IF(unit_m_${lang}.unit_number >= 10000, unit_m_${lang}.normal_icon_asset, concat('git/SIFStatic/icon/normal/', unit_m_${lang}.unit_number, '.png')) as normal_icon_asset,
+               IF(unit_m_${lang}.unit_number >= 10000, unit_m_${lang}.rank_max_icon_asset, concat('git/SIFStatic/icon/rankup/', unit_m_${lang}.unit_number, '.png')) as rank_max_icon_asset,
                unit_m_${lang}.default_removable_skill_capacity,
                unit_m_${lang}.smile_max,
                unit_m_${lang}.pure_max,
@@ -223,8 +223,8 @@
         )) units
         inner join (
             select unit_id, unit_number, rarity, case rarity when 1 then 'N' when 2 then 'R' when 3 then 'SR' when 4 then 'UR' when 5 then 'SSR' else '' end as rarity_string,
-                   eponym, name, IF(unit_number >= 10000, normal_icon_asset, concat('/git/SIFStatic/icon/normal/', unit_number, '.png')) as normal_icon_asset,
-                   IF(unit_number >= 10000, rank_max_icon_asset, concat('/git/SIFStatic/icon/rankup/', unit_number, '.png')) as rank_max_icon_asset,
+                   eponym, name, IF(unit_number >= 10000, normal_icon_asset, concat('git/SIFStatic/icon/normal/', unit_number, '.png')) as normal_icon_asset,
+                   IF(unit_number >= 10000, rank_max_icon_asset, concat('git/SIFStatic/icon/rankup/', unit_number, '.png')) as rank_max_icon_asset,
                    smile_max, pure_max, cool_max, default_removable_skill_capacity
             from unit_m_${lang}
             where (rarity = 4
@@ -334,8 +334,8 @@
                    unit_number,
                    eponym,
                    name,
-                   IF(unit_number >= 10000, normal_icon_asset, concat('/git/SIFStatic/icon/normal/', unit_number, '.png')) as normal_icon_asset,
-                   IF(unit_number >= 10000, rank_max_icon_asset, concat('/git/SIFStatic/icon/rankup/', unit_number, '.png')) as rank_max_icon_asset,
+                   IF(unit_number >= 10000, normal_icon_asset, concat('git/SIFStatic/icon/normal/', unit_number, '.png')) as normal_icon_asset,
+                   IF(unit_number >= 10000, rank_max_icon_asset, concat('git/SIFStatic/icon/rankup/', unit_number, '.png')) as rank_max_icon_asset,
                    rarity
             from unit_m_${lang}
         ) unit_info
@@ -367,6 +367,72 @@
             and unit_deck_id = #{unitDeckId}
         </if>
         order by unit_deck_id
+    </select>
+
+    <select id="searchEffortBoxLog" resultType="com.kotoumi.sifcapapi.model.vo.service.EffortBox">
+        select * from effort_box
+        where user_id = #{userId}
+        <if test="limited == 1">
+            and limited_effort_event_id is not null
+        </if>
+        order by open_time desc
+        limit #{start}, #{limit}
+    </select>
+
+    <select id="countEffortBoxLog" resultType="Integer">
+        select count(1) from effort_box
+        where user_id = #{userId}
+        <if test="limited == 1">
+            and limited_effort_event_id is not null
+        </if>
+    </select>
+
+    <select id="getLimitedBoxAsset" resultType="String">
+        select box_asset from limited_effort_box_asset_m_${lang}
+        where limited_effort_event_id = #{limitedEffortEventId}
+        and live_effort_point_box_spec_id = #{liveEffortPointBoxSpecId}
+    </select>
+
+    <select id="findAddTypes" resultType="com.kotoumi.sifcapapi.model.vo.service.AddType">
+        select * from add_type_m_${lang}
+        <where>
+            add_type in
+            <foreach collection="addTypeSet" item="addType" index="index" open="(" close=")" separator=",">
+                #{addType}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="findUnitRemovableSkills" resultType="com.kotoumi.sifcapapi.model.vo.service.UnitRemovableSkill">
+        select * from unit_removable_skill_m_${lang}
+        <where>
+            unit_removable_skill_id in
+            <foreach collection="removableIdList" item="removableId" index="index" open="(" close=")" separator=",">
+                #{removableId}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="findAward" resultType="com.kotoumi.sifcapapi.model.vo.service.Award">
+        select * from award_m_${lang}
+        where award_id = #{awardId}
+        limit 1
+    </select>
+
+    <select id="findAwards" resultType="com.kotoumi.sifcapapi.model.vo.service.Award">
+        select * from award_m_${lang}
+        <where>
+            award_id in
+            <foreach collection="awardIdList" item="awardId" index="index" open="(" close=")" separator=",">
+                #{awardId}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="findBackground" resultType="com.kotoumi.sifcapapi.model.vo.service.Background">
+        select * from background_m_${lang}
+        where background_id = #{backgroundId}
+        limit 1
     </select>
 
 </mapper>

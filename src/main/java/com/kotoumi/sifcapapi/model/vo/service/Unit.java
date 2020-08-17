@@ -17,10 +17,6 @@ import org.springframework.data.annotation.Transient;
 public class Unit {
 
     /**
-     * 自增ID
-     */
-    private Long id;
-    /**
      * 用户ID
      */
     private Integer userId;

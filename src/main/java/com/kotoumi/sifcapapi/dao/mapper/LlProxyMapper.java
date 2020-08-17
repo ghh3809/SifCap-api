@@ -1,8 +1,13 @@
 package com.kotoumi.sifcapapi.dao.mapper;
 
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
+import com.kotoumi.sifcapapi.model.vo.service.AddType;
+import com.kotoumi.sifcapapi.model.vo.service.Award;
+import com.kotoumi.sifcapapi.model.vo.service.Background;
 import com.kotoumi.sifcapapi.model.vo.service.Deck;
+import com.kotoumi.sifcapapi.model.vo.service.EffortBox;
 import com.kotoumi.sifcapapi.model.vo.service.Live;
+import com.kotoumi.sifcapapi.model.vo.service.UnitRemovableSkill;
 import com.kotoumi.sifcapapi.model.vo.service.SecretBoxLog;
 import com.kotoumi.sifcapapi.model.vo.service.Unit;
 import com.kotoumi.sifcapapi.model.vo.service.User;
@@ -11,6 +16,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author guohaohao
@@ -195,5 +201,88 @@ public interface LlProxyMapper {
     List<Deck> findDecks(@Param("userId") int userId,
                          @Param("unitDeckId") Integer unitDeckId,
                          @Param("lang") String lang);
+
+    /**
+     * 获取用户开箱信息
+     * @param userId 用户ID
+     * @param start 开始顺位
+     * @param limit 显示数量
+     * @param lang 数据语言
+     * @return 开箱信息
+     */
+    List<EffortBox> searchEffortBoxLog(@Param("userId") int userId,
+                                       @Param("start") int start,
+                                       @Param("limit") int limit,
+                                       @Param("limited") Integer limited,
+                                       @Param("lang") String lang);
+
+    /**
+     * 获取用户开箱信息总数
+     * @param userId 用户ID
+     * @param lang 数据语言
+     * @return 招募信息总数
+     */
+    int countEffortBoxLog(@Param("userId") int userId,
+                          @Param("limited") Integer limited,
+                          @Param("lang") String lang);
+
+    /**
+     * 获取开蛋的asset
+     * @param limitedEffortEventId 蛋类型
+     * @param liveEffortPointBoxSpecId 蛋大小
+     * @param lang 数据语言
+     * @return 蛋的asset
+     */
+    String getLimitedBoxAsset(@Param("limitedEffortEventId") int limitedEffortEventId,
+                              @Param("liveEffortPointBoxSpecId") int liveEffortPointBoxSpecId,
+                              @Param("lang") String lang);
+
+    /**
+     * 根据addType集合寻找类型信息
+     * @param addTypeSet addType集合
+     * @param lang 数据语言
+     * @return 类型信息
+     */
+    @MapKey("addType")
+    Map<Integer, AddType> findAddTypes(@Param("addTypeSet") Set<Integer> addTypeSet,
+                                       @Param("lang") String lang);
+
+    /**
+     * 根据宝石ID列表寻找宝石信息
+     * @param removableIdList 宝石ID列表
+     * @param lang 数据语言
+     * @return 宝石信息
+     */
+    @MapKey("unitRemovableSkillId")
+    Map<Integer, UnitRemovableSkill> findUnitRemovableSkills(@Param("removableIdList") List<Integer> removableIdList,
+                                                             @Param("lang") String lang);
+
+    /**
+     * 获取称号
+     * @param awardId 称号ID
+     * @param lang 数据语言
+     * @return 称号信息
+     */
+    Award findAward(@Param("awardId") int awardId,
+                    @Param("lang") String lang);
+
+    /**
+     * 获取称号列表
+     * @param awardIdList 称号ID列表
+     * @param lang 数据语言
+     * @return 称号信息
+     */
+    @MapKey("awardId")
+    Map<Integer, Award> findAwards(@Param("awardIdList") List<Integer> awardIdList,
+                                   @Param("lang") String lang);
+
+    /**
+     * 获取背景
+     * @param backgroundId 背景ID
+     * @param lang 数据语言
+     * @return 背景信息
+     */
+    Background findBackground(@Param("backgroundId") int backgroundId,
+                              @Param("lang") String lang);
 
 }

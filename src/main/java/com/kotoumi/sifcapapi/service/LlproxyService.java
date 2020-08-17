@@ -1,6 +1,7 @@
 package com.kotoumi.sifcapapi.service;
 
 import com.kotoumi.sifcapapi.model.vo.response.DeckInfoResponse;
+import com.kotoumi.sifcapapi.model.vo.response.EffortBoxLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
 import com.kotoumi.sifcapapi.model.vo.response.LiveDetailResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
@@ -113,5 +114,15 @@ public interface LlproxyService {
      * @return llhelper卡组信息
      */
     List<LLHelperUnit> deckExport(int uid, int unitDeckId, Integer islive, String lang);
+
+    /**
+     * 获取开箱记录
+     * @param uid 用户id
+     * @param page 页码
+     * @param limit 数量
+     * @param lang 数据语音
+     * @return 开箱记录
+     */
+    EffortBoxLogResponse effortBoxLog(int uid, int page, int limit, Integer limited, String lang);
 
 }

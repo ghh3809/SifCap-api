@@ -150,6 +150,10 @@ public class User {
      */
     private Integer settingAwardId;
     /**
+     * 称号资源
+     */
+    private String awardAsset;
+    /**
      * 背景ID
      */
     private Integer settingBackgroundId;
