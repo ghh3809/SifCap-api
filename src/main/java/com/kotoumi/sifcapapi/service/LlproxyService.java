@@ -43,10 +43,11 @@ public interface LlproxyService {
      * @param setId live_setting_id
      * @param eventId 活动ID
      * @param keyword 关键词
+     * @param isDuel 是否是百协活动
      * @param lang 数据语音
      * @return 演唱会信息
      */
-    LiveInfoResponse liveInfo(int uid, int page, int limit, Integer setId, Integer eventId, String keyword, String lang);
+    LiveInfoResponse liveInfo(int uid, int page, int limit, Integer setId, Integer eventId, String keyword, Integer isDuel, String lang);
 
     /**
      * 获取演唱会信息

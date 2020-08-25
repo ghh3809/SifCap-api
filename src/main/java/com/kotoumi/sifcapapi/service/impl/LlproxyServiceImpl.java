@@ -84,10 +84,10 @@ public class LlproxyServiceImpl implements LlproxyService {
     }
 
     @Override
-    public LiveInfoResponse liveInfo(int uid, int page, int limit, Integer setId, Integer eventId, String keyword, String lang) {
+    public LiveInfoResponse liveInfo(int uid, int page, int limit, Integer setId, Integer eventId, String keyword, Integer isDuel, String lang) {
         int start = limit * (page - 1);
-        List<Live> liveList = llProxyMapper.searchLive(uid, start, limit, setId, eventId, keyword, lang);
-        int liveCount = llProxyMapper.countLive(uid, setId, eventId, keyword, lang);
+        List<Live> liveList = llProxyMapper.searchLive(uid, start, limit, setId, eventId, keyword, isDuel, lang);
+        int liveCount = llProxyMapper.countLive(uid, setId, eventId, keyword, isDuel, lang);
         for (Live live : liveList) {
             updateLiveInfo(live, false, lang);
         }

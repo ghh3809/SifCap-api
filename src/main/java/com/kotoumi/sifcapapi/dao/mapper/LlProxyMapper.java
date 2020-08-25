@@ -51,6 +51,7 @@ public interface LlProxyMapper {
      * @param setId live_setting_id
      * @param eventId 活动ID
      * @param keyword 搜索关键词
+     * @param isDuel 是否是百人协力
      * @param lang 数据语言
      * @return 演唱会信息
      */
@@ -60,6 +61,7 @@ public interface LlProxyMapper {
                           @Param("setId") Integer setId,
                           @Param("eventId") Integer eventId,
                           @Param("keyword") String keyword,
+                          @Param("isDuel") Integer isDuel,
                           @Param("lang") String lang);
 
     /**
@@ -77,6 +79,7 @@ public interface LlProxyMapper {
      * @param setId live_setting_id
      * @param eventId 活动ID
      * @param keyword 搜索关键词
+     * @param isDuel 是否是百人协力
      * @param lang 数据语言
      * @return 演唱会总数
      */
@@ -84,6 +87,7 @@ public interface LlProxyMapper {
                   @Param("setId") Integer setId,
                   @Param("eventId") Integer eventId,
                   @Param("keyword") String keyword,
+                  @Param("isDuel") Integer isDuel,
                   @Param("lang") String lang);
 
     /**

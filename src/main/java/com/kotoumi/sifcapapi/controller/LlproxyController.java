@@ -77,14 +77,15 @@ public class LlproxyController extends BaseController {
                                       @RequestParam(name = "setid", required = false) Integer setId,
                                       @RequestParam(name = "eventid", required = false) Integer eventId,
                                       @RequestParam(name = "keyword", required = false) String keyword,
+                                      @RequestParam(name = "isduel", required = false) Integer isDuel,
                                       @RequestParam(name = "lang", required = false) String lang) {
 
-        log.info("liveInfo uid: {}, page: {}, limit: {}, setId: {}, eventId: {}, keyword: {}, lang: {}",
-                uid, page, limit, setId, eventId, keyword, lang);
+        log.info("liveInfo uid: {}, page: {}, limit: {}, setId: {}, eventId: {}, keyword: {}, isduel: {}, lang: {}",
+                uid, page, limit, setId, eventId, keyword, isDuel, lang);
         if (StringUtils.isBlank(lang)) {
             lang = "CN";
         }
-        LiveInfoResponse liveInfoResponse = llproxyService.liveInfo(uid, page, limit, setId, eventId, keyword, lang.toLowerCase());
+        LiveInfoResponse liveInfoResponse = llproxyService.liveInfo(uid, page, limit, setId, eventId, keyword, isDuel, lang.toLowerCase());
         return ResponseEntity.ok(finish(liveInfoResponse));
 
     }

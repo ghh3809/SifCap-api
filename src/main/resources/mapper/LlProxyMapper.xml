@@ -28,6 +28,14 @@
             <if test="eventId != null">
                 and event_id = #{eventId}
             </if>
+            <choose>
+                <when test="isDuel == 1">
+                    and event_id = -1
+                </when>
+                <otherwise>
+                    and event_id != -1
+                </otherwise>
+            </choose>
         ) play
         left join (
             (select live_difficulty_id, live_setting_id from normal_live_m_${lang})
@@ -106,6 +114,14 @@
             <if test="eventId != null">
                 and event_id = #{eventId}
             </if>
+            <choose>
+                <when test="isDuel == 1">
+                    and event_id = -1
+                </when>
+                <otherwise>
+                    and event_id != -1
+                </otherwise>
+            </choose>
         ) play
         left join (
             (select live_difficulty_id, live_setting_id from normal_live_m_${lang})
