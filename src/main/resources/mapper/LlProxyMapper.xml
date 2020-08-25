@@ -371,11 +371,24 @@
 
     <select id="searchEffortBoxLog" resultType="com.kotoumi.sifcapapi.model.vo.service.EffortBox">
         select * from effort_box
-        where user_id = #{userId}
-        <if test="limited == 1">
-            and limited_effort_event_id is not null
-        </if>
-        order by open_time desc
+        <choose>
+            <when test="minOpenTime != null">
+                <where>
+                    <if test="userId != 0">
+                        user_id = #{userId}
+                    </if>
+                    and open_time > #{minOpenTime}
+                </where>
+                order by open_time
+            </when>
+            <otherwise>
+                where user_id = #{userId}
+                <if test="limited == 1">
+                    and limited_effort_event_id is not null
+                </if>
+                order by open_time desc
+            </otherwise>
+        </choose>
         limit #{start}, #{limit}
     </select>
 

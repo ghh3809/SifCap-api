@@ -208,13 +208,15 @@ public interface LlProxyMapper {
      * @param start 开始顺位
      * @param limit 显示数量
      * @param lang 数据语言
+     * @param minOpenTime 最早开箱时间
      * @return 开箱信息
      */
     List<EffortBox> searchEffortBoxLog(@Param("userId") int userId,
                                        @Param("start") int start,
                                        @Param("limit") int limit,
                                        @Param("limited") Integer limited,
-                                       @Param("lang") String lang);
+                                       @Param("lang") String lang,
+                                       @Param("minOpenTime") String minOpenTime);
 
     /**
      * 获取用户开箱信息总数

@@ -2,6 +2,8 @@ package com.kotoumi.sifcapapi.service;
 
 import com.kotoumi.sifcapapi.model.vo.response.DeckInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.response.EffortBoxLogResponse;
+import com.kotoumi.sifcapapi.model.vo.response.EffortBoxStatResponse;
+import com.kotoumi.sifcapapi.model.vo.response.EffortBoxTypeStat;
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
 import com.kotoumi.sifcapapi.model.vo.response.LiveDetailResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
@@ -40,6 +42,7 @@ public interface LlproxyService {
      * @param limit 数量
      * @param setId live_setting_id
      * @param eventId 活动ID
+     * @param keyword 关键词
      * @param lang 数据语音
      * @return 演唱会信息
      */
@@ -101,6 +104,7 @@ public interface LlproxyService {
     /**
      * 获取队伍信息
      * @param uid 用户id
+     * @param islive 是否live社员
      * @param lang 数据语音
      * @return 抽卡记录
      */
@@ -110,6 +114,7 @@ public interface LlproxyService {
      * 导出llhelper队伍信息
      * @param uid 用户id
      * @param unitDeckId 卡组ID
+     * @param islive 是否live社员
      * @param lang 数据语音
      * @return llhelper卡组信息
      */
@@ -120,9 +125,18 @@ public interface LlproxyService {
      * @param uid 用户id
      * @param page 页码
      * @param limit 数量
+     * @param limited 是否是蛋
      * @param lang 数据语音
      * @return 开箱记录
      */
     EffortBoxLogResponse effortBoxLog(int uid, int page, int limit, Integer limited, String lang);
+
+    /**
+     * 获取开箱统计
+     * @param uid 用户id
+     * @param limited 是否是蛋
+     * @return 开箱记录
+     */
+    EffortBoxStatResponse effortBoxStat(Integer uid, Integer limited);
 
 }

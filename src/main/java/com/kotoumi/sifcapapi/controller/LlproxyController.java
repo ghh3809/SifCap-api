@@ -3,15 +3,13 @@ package com.kotoumi.sifcapapi.controller;
 import com.alibaba.fastjson.JSON;
 import com.kotoumi.sifcapapi.model.vo.response.DeckInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.response.EffortBoxLogResponse;
+import com.kotoumi.sifcapapi.model.vo.response.EffortBoxStatResponse;
+import com.kotoumi.sifcapapi.model.vo.response.EffortBoxTypeStat;
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
 import com.kotoumi.sifcapapi.model.vo.response.LiveDetailResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.response.SecretBoxLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.UnitsInfoResponse;
-import com.kotoumi.sifcapapi.model.vo.service.EffortBox;
-import com.kotoumi.sifcapapi.model.vo.service.Reward;
-import com.kotoumi.sifcapapi.model.vo.service.SecretBoxLog;
-import com.kotoumi.sifcapapi.model.vo.service.Unit;
 import com.kotoumi.sifcapapi.model.vo.service.User;
 import com.kotoumi.sifcapapi.service.LlproxyService;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,9 +29,6 @@ import javax.annotation.Resource;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -229,12 +223,22 @@ public class LlproxyController extends BaseController {
                                           @RequestParam(name = "limited", required = false) Integer limited,
                                           @RequestParam(name = "lang", required = false) String lang) {
 
-        log.info("secretBoxLog uid: {}, page: {}, limit: {}, limited: {}, lang: {}", uid, page, limit, limited, lang);
+        log.info("effortBoxLog uid: {}, page: {}, limit: {}, limited: {}, lang: {}", uid, page, limit, limited, lang);
         if (StringUtils.isBlank(lang)) {
             lang = "CN";
         }
         EffortBoxLogResponse effortBoxLogResponse = llproxyService.effortBoxLog(uid, page, limit, limited, lang.toLowerCase());
         return ResponseEntity.ok(finish(effortBoxLogResponse));
+
+    }
+
+    @GetMapping("effortBoxStat")
+    public ResponseEntity<?> effortBoxStat(@Min(value = 0, message = "uid") int uid,
+                                           @RequestParam(name = "limited", required = false) Integer limited) {
+
+        log.info("effortBoxStat uid: {}, limited: {}", uid, limited);
+        EffortBoxStatResponse effortBoxStatResponse = llproxyService.effortBoxStat(uid, limited);
+        return ResponseEntity.ok(finish(effortBoxStatResponse));
 
     }
 
