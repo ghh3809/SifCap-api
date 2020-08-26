@@ -1,7 +1,7 @@
 package com.kotoumi.sifcapapi.model.vo.service;
 
-import com.kotoumi.sifcapapi.model.vo.response.EffortBoxItemStat;
-import com.kotoumi.sifcapapi.model.vo.response.EffortBoxTypeStat;
+import com.kotoumi.sifcapapi.model.vo.response.BoxItemStat;
+import com.kotoumi.sifcapapi.model.vo.response.BoxTypeStat;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 箱子统计类
  * @author guohaohao
  */
 @Data
@@ -24,11 +25,11 @@ public class EffortBoxStat {
     /**
      * 箱子统计结果
      */
-    List<EffortBoxTypeStat> usualBoxTypeStatList;
+    List<BoxTypeStat> usualBoxTypeStatList;
     /**
      * 蛋统计结果
      */
-    List<EffortBoxTypeStat> limitedBoxTypeStatList;
+    List<BoxTypeStat> limitedBoxTypeStatList;
 
     static {
         ASSET_MAP.put("道具 - 爱心碎片", "assets/image/item/item_1000_m.png");
@@ -59,20 +60,21 @@ public class EffortBoxStat {
     public EffortBoxStat() {
 
         this.lastOpenTime = "";
-        this.usualBoxTypeStatList = new ArrayList<>();
-        this.limitedBoxTypeStatList = new ArrayList<>();
+        this.usualBoxTypeStatList = new ArrayList<>(5);
+        this.limitedBoxTypeStatList = new ArrayList<>(5);
 
         // 初始化统计数据
-        int[] basicCapacity = new int[] {4000000, 2000000, 1200000, 400000, 100000};
-        for (int capacity : basicCapacity) {
-            this.usualBoxTypeStatList.add(new EffortBoxTypeStat(
-                    capacity,
+        String[] basicCapacity = new String[] {"4000000", "2000000", "1200000", "400000", "100000"};
+        String[] limitedCapacity = new String[] {"10000000", "5000000", "3000000", "1000000", "400000"};
+        for (int i = 0 ; i < basicCapacity.length; i ++) {
+            this.usualBoxTypeStatList.add(new BoxTypeStat(
+                    basicCapacity[i],
                     0,
                     new ArrayList<>(),
                     new HashMap<>()
             ));
-            this.limitedBoxTypeStatList.add(new EffortBoxTypeStat(
-                    capacity * 5 / 2,
+            this.limitedBoxTypeStatList.add(new BoxTypeStat(
+                    limitedCapacity[i],
                     0,
                     new ArrayList<>(),
                     new HashMap<>()
@@ -86,18 +88,18 @@ public class EffortBoxStat {
         updateData(this.limitedBoxTypeStatList);
     }
 
-    public void updateData(List<EffortBoxTypeStat> effortBoxTypeStatList) {
-        for (EffortBoxTypeStat effortBoxTypeStat : effortBoxTypeStatList) {
-            effortBoxTypeStat.setItems(new ArrayList<>());
-            for (Map.Entry<String, Integer> entry : effortBoxTypeStat.getItemsMap().entrySet()) {
-                effortBoxTypeStat.getItems().add(new EffortBoxItemStat(
+    public void updateData(List<BoxTypeStat> boxTypeStatList) {
+        for (BoxTypeStat boxTypeStat : boxTypeStatList) {
+            boxTypeStat.setItems(new ArrayList<>());
+            for (Map.Entry<String, Integer> entry : boxTypeStat.getItemsMap().entrySet()) {
+                boxTypeStat.getItems().add(new BoxItemStat(
                         entry.getKey(),
                         ASSET_MAP.getOrDefault(entry.getKey(), null),
                         entry.getValue(),
-                        String.format("%.2f%%", 100.0 * entry.getValue() / effortBoxTypeStat.getCount())
+                        String.format("%.2f%%", 100.0 * entry.getValue() / boxTypeStat.getCount())
                 ));
             }
-            effortBoxTypeStat.getItems().sort(Comparator.comparing(EffortBoxItemStat::getAmount).reversed());
+            boxTypeStat.getItems().sort(Comparator.comparing(BoxItemStat::getAmount).reversed());
         }
     }
 

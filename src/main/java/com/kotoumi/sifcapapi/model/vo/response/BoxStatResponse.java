@@ -8,14 +8,15 @@ import lombok.Data;
 import java.util.List;
 
 /**
+ * 查询统计时的最终返回
  * @author guohaohao
  */
 @Data
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class EffortBoxStatResponse {
+public class BoxStatResponse {
 
-    private List<EffortBoxTypeStat> stats;
+    private List<BoxTypeStat> stats;
     private String updateTime;
 
 }

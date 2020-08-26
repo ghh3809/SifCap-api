@@ -2,9 +2,9 @@ package com.kotoumi.sifcapapi.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.kotoumi.sifcapapi.model.vo.response.DeckInfoResponse;
+import com.kotoumi.sifcapapi.model.vo.response.DuelLiveBoxLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.EffortBoxLogResponse;
-import com.kotoumi.sifcapapi.model.vo.response.EffortBoxStatResponse;
-import com.kotoumi.sifcapapi.model.vo.response.EffortBoxTypeStat;
+import com.kotoumi.sifcapapi.model.vo.response.BoxStatResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
 import com.kotoumi.sifcapapi.model.vo.response.LiveDetailResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
@@ -238,8 +238,32 @@ public class LlproxyController extends BaseController {
                                            @RequestParam(name = "limited", required = false) Integer limited) {
 
         log.info("effortBoxStat uid: {}, limited: {}", uid, limited);
-        EffortBoxStatResponse effortBoxStatResponse = llproxyService.effortBoxStat(uid, limited);
-        return ResponseEntity.ok(finish(effortBoxStatResponse));
+        BoxStatResponse boxStatResponse = llproxyService.effortBoxStat(uid, limited);
+        return ResponseEntity.ok(finish(boxStatResponse));
+
+    }
+
+    @GetMapping("duelLiveBoxLog")
+    public ResponseEntity<?> duelLiveBoxLog(@Min(value = 1, message = "uid") int uid,
+                                            @Min(value = 1, message = "page") int page,
+                                            @Min(value = 1, message = "limit") int limit,
+                                            @RequestParam(name = "lang", required = false) String lang) {
+
+        log.info("duelLiveBoxLog uid: {}, page: {}, limit: {}, lang: {}", uid, page, limit, lang);
+        if (StringUtils.isBlank(lang)) {
+            lang = "CN";
+        }
+        DuelLiveBoxLogResponse duelLiveBoxLogResponse = llproxyService.duelLiveBoxLog(uid, page, limit, lang.toLowerCase());
+        return ResponseEntity.ok(finish(duelLiveBoxLogResponse));
+
+    }
+
+    @GetMapping("duelLiveBoxStat")
+    public ResponseEntity<?> duelLiveBoxStat(@Min(value = 0, message = "uid") int uid) {
+
+        log.info("duelLiveBoxStat uid: {}", uid);
+        BoxStatResponse boxStatResponse = llproxyService.duelLiveBoxStat(uid);
+        return ResponseEntity.ok(finish(boxStatResponse));
 
     }
 

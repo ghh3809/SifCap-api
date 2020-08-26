@@ -10,16 +10,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 一个箱子统计表格
  * @author guohaohao
  */
 @Data
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class EffortBoxTypeStat {
+public class BoxTypeStat {
 
-    private Integer capacity;
+    private String desc;
     private Integer count;
-    private List<EffortBoxItemStat> items;
+    private List<BoxItemStat> items;
     @JsonIgnore
     private Map<String, Integer> itemsMap;
 

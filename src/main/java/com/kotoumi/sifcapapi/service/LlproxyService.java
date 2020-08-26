@@ -1,9 +1,9 @@
 package com.kotoumi.sifcapapi.service;
 
 import com.kotoumi.sifcapapi.model.vo.response.DeckInfoResponse;
+import com.kotoumi.sifcapapi.model.vo.response.DuelLiveBoxLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.EffortBoxLogResponse;
-import com.kotoumi.sifcapapi.model.vo.response.EffortBoxStatResponse;
-import com.kotoumi.sifcapapi.model.vo.response.EffortBoxTypeStat;
+import com.kotoumi.sifcapapi.model.vo.response.BoxStatResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
 import com.kotoumi.sifcapapi.model.vo.response.LiveDetailResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
@@ -138,6 +138,24 @@ public interface LlproxyService {
      * @param limited 是否是蛋
      * @return 开箱记录
      */
-    EffortBoxStatResponse effortBoxStat(Integer uid, Integer limited);
+    BoxStatResponse effortBoxStat(Integer uid, Integer limited);
+
+    /**
+     * 获取百人协力开箱记录
+     * @param uid 用户id
+     * @param page 页码
+     * @param limit 数量
+     * @param lang 数据语音
+     * @return 百人协力开箱记录
+     */
+    DuelLiveBoxLogResponse duelLiveBoxLog(int uid, int page, int limit, String lang);
+
+    /**
+     * 获取百人协力开箱统计
+     * @param uid 用户id
+     * @return 开箱记录
+     */
+    BoxStatResponse duelLiveBoxStat(Integer uid);
+
 
 }

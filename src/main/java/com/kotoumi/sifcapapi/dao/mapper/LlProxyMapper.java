@@ -5,6 +5,7 @@ import com.kotoumi.sifcapapi.model.vo.service.AddType;
 import com.kotoumi.sifcapapi.model.vo.service.Award;
 import com.kotoumi.sifcapapi.model.vo.service.Background;
 import com.kotoumi.sifcapapi.model.vo.service.Deck;
+import com.kotoumi.sifcapapi.model.vo.service.DuelLiveBox;
 import com.kotoumi.sifcapapi.model.vo.service.EffortBox;
 import com.kotoumi.sifcapapi.model.vo.service.Live;
 import com.kotoumi.sifcapapi.model.vo.service.UnitRemovableSkill;
@@ -231,6 +232,30 @@ public interface LlProxyMapper {
     int countEffortBoxLog(@Param("userId") int userId,
                           @Param("limited") Integer limited,
                           @Param("lang") String lang);
+
+    /**
+     * 获取用户开箱信息
+     * @param userId 用户ID
+     * @param start 开始顺位
+     * @param limit 显示数量
+     * @param lang 数据语言
+     * @param minOpenTime 最早开箱时间
+     * @return 开箱信息
+     */
+    List<DuelLiveBox> searchDuelLiveBoxLog(@Param("userId") int userId,
+                                           @Param("start") int start,
+                                           @Param("limit") int limit,
+                                           @Param("lang") String lang,
+                                           @Param("minOpenTime") String minOpenTime);
+
+    /**
+     * 获取用户开箱信息总数
+     * @param userId 用户ID
+     * @param lang 数据语言
+     * @return 招募信息总数
+     */
+    int countDuelLiveBoxLog(@Param("userId") int userId,
+                            @Param("lang") String lang);
 
     /**
      * 获取开蛋的asset

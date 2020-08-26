@@ -416,6 +416,31 @@
         </if>
     </select>
 
+    <select id="searchDuelLiveBoxLog" resultType="com.kotoumi.sifcapapi.model.vo.service.DuelLiveBox">
+        select * from duel_live_box
+        <choose>
+            <when test="minOpenTime != null">
+                <where>
+                    <if test="userId != 0">
+                        user_id = #{userId}
+                    </if>
+                    and open_time > #{minOpenTime}
+                </where>
+                order by open_time
+            </when>
+            <otherwise>
+                where user_id = #{userId}
+                order by open_time desc
+            </otherwise>
+        </choose>
+        limit #{start}, #{limit}
+    </select>
+
+    <select id="countDuelLiveBoxLog" resultType="Integer">
+        select count(1) from duel_live_box
+        where user_id = #{userId}
+    </select>
+
     <select id="getLimitedBoxAsset" resultType="String">
         select box_asset from limited_effort_box_asset_m_${lang}
         where limited_effort_event_id = #{limitedEffortEventId}

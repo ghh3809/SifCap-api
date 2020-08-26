@@ -4,9 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.kotoumi.sifcapapi.dao.mapper.LlProxyMapper;
 import com.kotoumi.sifcapapi.model.vo.response.DeckInfoResponse;
+import com.kotoumi.sifcapapi.model.vo.response.DuelLiveBoxLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.EffortBoxLogResponse;
-import com.kotoumi.sifcapapi.model.vo.response.EffortBoxStatResponse;
-import com.kotoumi.sifcapapi.model.vo.response.EffortBoxTypeStat;
+import com.kotoumi.sifcapapi.model.vo.response.BoxStatResponse;
+import com.kotoumi.sifcapapi.model.vo.response.BoxTypeStat;
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
 import com.kotoumi.sifcapapi.model.vo.response.LiveDetailResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
@@ -16,6 +17,8 @@ import com.kotoumi.sifcapapi.model.vo.service.AddType;
 import com.kotoumi.sifcapapi.model.vo.service.Award;
 import com.kotoumi.sifcapapi.model.vo.service.Background;
 import com.kotoumi.sifcapapi.model.vo.service.Deck;
+import com.kotoumi.sifcapapi.model.vo.service.DuelLiveBox;
+import com.kotoumi.sifcapapi.model.vo.service.DuelLiveBoxStat;
 import com.kotoumi.sifcapapi.model.vo.service.EffortBox;
 import com.kotoumi.sifcapapi.model.vo.service.EffortBoxStat;
 import com.kotoumi.sifcapapi.model.vo.service.Live;
@@ -47,6 +50,7 @@ public class LlproxyServiceImpl implements LlproxyService {
     private static final String EFFORT_BOX_ASSET = "assets/flash/ui/live/img/box_icon_%s.png";
     private static final String ITEM_ASSET = "assets/image/item/item_%s_m.png";
     private static final String STICKER_ASSET = "assets/image/exchange_point/exchange_point_2_x.png";
+    private static final String SYRUP_ASSET = "assets/image/recovery_item/recovery_07_m.png";
 
     private static final int ADD_TYPE_ITEM = 1000;
     private static final int ADD_TYPE_UNIT = 1001;
@@ -56,12 +60,16 @@ public class LlproxyServiceImpl implements LlproxyService {
     private static final int ADD_TYPE_AWARD = 5100;
     private static final int ADD_TYPE_BACKGROUND = 5200;
     private static final int ADD_TYPE_REMOVABLE = 5500;
+    private static final int ADD_TYPE_LP = 8000;
     private static final int ITEM_ID_LOVECA_PIECE = 1000;
     private static final int ITEM_ID_STICKER = 2;
+    private static final int ITEM_ID_SYRUP = 7;
     private static final String NAME_LOVECA_PIECE = "爱心碎片";
     private static final String NAME_STICKER = "贴纸";
+    private static final String NAME_SYRUP = "糖浆";
 
     private static final Map<Integer, EffortBoxStat> EFFORT_BOX_STAT_MAP = new HashMap<>();
+    private static final Map<Integer, DuelLiveBoxStat> DUEL_LIVE_BOX_STAT_MAP = new HashMap<>();
 
     @Resource
     private LlProxyMapper llProxyMapper;
@@ -260,7 +268,7 @@ public class LlproxyServiceImpl implements LlproxyService {
     }
 
     @Override
-    public EffortBoxStatResponse effortBoxStat(Integer uid, Integer limited) {
+    public BoxStatResponse effortBoxStat(Integer uid, Integer limited) {
 
         if (!EFFORT_BOX_STAT_MAP.containsKey(uid)) {
             EFFORT_BOX_STAT_MAP.put(uid, new EffortBoxStat());
@@ -277,13 +285,13 @@ public class LlproxyServiceImpl implements LlproxyService {
 
                     // 更新箱子数据
                     for (EffortBox effortBox : effortBoxList) {
-                        EffortBoxTypeStat effortBoxTypeStat = effortBox.getLimitedEffortEventId() == null ?
+                        BoxTypeStat boxTypeStat = effortBox.getLimitedEffortEventId() == null ?
                                 effortBoxStat.getUsualBoxTypeStatList().get(5 - effortBox.getLiveEffortPointBoxSpecId()) :
                                 effortBoxStat.getLimitedBoxTypeStatList().get(5 - effortBox.getLiveEffortPointBoxSpecId());
                         for (Reward reward : JSON.parseObject(effortBox.getRewardsJson(), new TypeReference<List<Reward>>() {})) {
-                            effortBoxTypeStat.addItem(getTypeKey(reward));
+                            boxTypeStat.addItem(getTypeKey(reward));
                         }
-                        effortBoxTypeStat.addCount();
+                        boxTypeStat.addCount();
                     }
 
                     // 更新本轮次数据
@@ -297,8 +305,69 @@ public class LlproxyServiceImpl implements LlproxyService {
         }
         log.info("effortBoxStat last open time: {}", effortBoxStat.getLastOpenTime());
         return (limited == null || limited == 0) ?
-                new EffortBoxStatResponse(effortBoxStat.getUsualBoxTypeStatList(), effortBoxStat.getLastOpenTime()) :
-                new EffortBoxStatResponse(effortBoxStat.getLimitedBoxTypeStatList(), effortBoxStat.getLastOpenTime());
+                new BoxStatResponse(effortBoxStat.getUsualBoxTypeStatList(), effortBoxStat.getLastOpenTime()) :
+                new BoxStatResponse(effortBoxStat.getLimitedBoxTypeStatList(), effortBoxStat.getLastOpenTime());
+    }
+
+    @Override
+    public DuelLiveBoxLogResponse duelLiveBoxLog(int uid, int page, int limit, String lang) {
+        int start = limit * (page - 1);
+        List<DuelLiveBox> duelLiveBoxList = llProxyMapper.searchDuelLiveBoxLog(uid, start, limit, lang, null);
+        int duelLiveBoxLogCount = llProxyMapper.countDuelLiveBoxLog(uid, lang);
+        updateDuelLiveBoxLogInfo(duelLiveBoxList, lang);
+        return new DuelLiveBoxLogResponse(duelLiveBoxList, page, (duelLiveBoxLogCount - 1) / limit + 1, limit, duelLiveBoxLogCount);
+    }
+
+    @Override
+    public BoxStatResponse duelLiveBoxStat(Integer uid) {
+
+        if (!DUEL_LIVE_BOX_STAT_MAP.containsKey(uid)) {
+            DUEL_LIVE_BOX_STAT_MAP.put(uid, new DuelLiveBoxStat());
+        }
+        DuelLiveBoxStat duelLiveBoxStat = DUEL_LIVE_BOX_STAT_MAP.get(uid);
+        List<BoxTypeStat> boxTypeStatList = duelLiveBoxStat.getBoxTypeStatList();
+
+        // 这里注意同步问题，只有拿到锁之后才允许更新数据
+        synchronized (DUEL_LIVE_BOX_STAT_MAP.get(uid)) {
+            while (true) {
+                List<DuelLiveBox> duelLiveBoxList = llProxyMapper.searchDuelLiveBoxLog(
+                        uid, 0, 10000, null, duelLiveBoxStat.getLastOpenTime());
+                log.info("duelLiveBoxStat update count: {}", duelLiveBoxList.size());
+                if (!duelLiveBoxList.isEmpty()) {
+
+                    // 更新箱子数据
+                    for (DuelLiveBox duelLiveBox : duelLiveBoxList) {
+                        // 完成箱子
+                        int clearRankIndex = 0;
+                        for (Reward reward : JSON.parseObject(duelLiveBox.getLiveClearJson(), new TypeReference<List<Reward>>() {})) {
+                            boxTypeStatList.get(clearRankIndex).addItem(getTypeKey(reward));
+                            boxTypeStatList.get(clearRankIndex).addCount();
+                        }
+                        // 分数箱子
+                        int scoreRankIndex = duelLiveBox.getScoreRank() > 5 ? 12 - duelLiveBox.getScoreRank() : 7;
+                        for (Reward reward : JSON.parseObject(duelLiveBox.getLiveRankJson(), new TypeReference<List<Reward>>() {})) {
+                            boxTypeStatList.get(scoreRankIndex).addItem(getTypeKey(reward));
+                            boxTypeStatList.get(scoreRankIndex).addCount();
+                        }
+                        // 连击箱子
+                        int comboRankIndex = 7 + duelLiveBox.getComboRank();
+                        for (Reward reward : JSON.parseObject(duelLiveBox.getLiveComboJson(), new TypeReference<List<Reward>>() {})) {
+                            boxTypeStatList.get(comboRankIndex).addItem(getTypeKey(reward));
+                            boxTypeStatList.get(comboRankIndex).addCount();
+                        }
+                    }
+
+                    // 更新本轮次数据
+                    duelLiveBoxStat.setLastOpenTime(duelLiveBoxList.get(duelLiveBoxList.size() - 1).getOpenTime());
+                    duelLiveBoxStat.updateData();
+
+                } else {
+                    break;
+                }
+            }
+        }
+        log.info("duelLiveBoxStat last open time: {}", duelLiveBoxStat.getLastOpenTime());
+        return new BoxStatResponse(boxTypeStatList, duelLiveBoxStat.getLastOpenTime());
     }
 
     /**
@@ -432,9 +501,7 @@ public class LlproxyServiceImpl implements LlproxyService {
      */
     private void updateEffortBoxLogInfo(List<EffortBox> effortBoxList, String lang) {
 
-        Set<Integer> addTypeSet = new HashSet<>();
-        List<Integer> unitIdList = new ArrayList<>();
-        List<Integer> removableIdList = new ArrayList<>();
+        List<Reward> rewardList = new ArrayList<>();
 
         for (EffortBox effortBox : effortBoxList) {
             // 更新箱子asset
@@ -448,26 +515,81 @@ public class LlproxyServiceImpl implements LlproxyService {
                         effortBox.getLiveEffortPointBoxSpecId(), lang));
             }
 
-            // 更新各奖励asset
-            for (Reward reward : effortBox.getRewards()) {
-                switch (reward.getAddType()) {
-                    case ADD_TYPE_UNIT:
-                        unitIdList.add(reward.getUnitId());
-                        break;
-                    case ADD_TYPE_REMOVABLE:
-                        removableIdList.add(reward.getItemId());
-                        break;
-                    case ADD_TYPE_ITEM:
-                    case ADD_TYPE_STICKER:
-                    case ADD_TYPE_AWARD:
-                    case ADD_TYPE_BACKGROUND:
-                        break;
-                    default:
-                        addTypeSet.add(reward.getAddType());
-                        break;
-                }
+            rewardList.addAll(effortBox.getRewards());
+        }
 
+        updateRewardInfo(rewardList, lang);
+
+    }
+
+    /**
+     * 更新百协开箱信息
+     * @param duelLiveBoxList 百协开箱信息列表
+     * @param lang 数据语言
+     */
+    private void updateDuelLiveBoxLogInfo(List<DuelLiveBox> duelLiveBoxList, String lang) {
+
+        List<Reward> rewardList = new ArrayList<>();
+        List<Reward> rewards;
+
+        for (DuelLiveBox duelLiveBox : duelLiveBoxList) {
+
+            rewards = JSON.parseObject(duelLiveBox.getLiveClearJson(), new TypeReference<List<Reward>>() {});
+            if (rewards != null && !rewards.isEmpty()) {
+                duelLiveBox.setLiveClear(rewards.get(0));
+                rewardList.add(duelLiveBox.getLiveClear());
             }
+            rewards = JSON.parseObject(duelLiveBox.getLiveRankJson(), new TypeReference<List<Reward>>() {});
+            if (rewards != null && !rewards.isEmpty()) {
+                duelLiveBox.setLiveRank(rewards.get(0));
+                rewardList.add(duelLiveBox.getLiveRank());
+            }
+            rewards = JSON.parseObject(duelLiveBox.getLiveComboJson(), new TypeReference<List<Reward>>() {});
+            if (rewards != null && !rewards.isEmpty()) {
+                duelLiveBox.setLiveCombo(rewards.get(0));
+                rewardList.add(duelLiveBox.getLiveCombo());
+            }
+
+            duelLiveBox.setLiveClearJson(null);
+            duelLiveBox.setLiveRankJson(null);
+            duelLiveBox.setLiveComboJson(null);
+
+        }
+
+        updateRewardInfo(rewardList, lang);
+
+    }
+
+    /**
+     * 更新reward信息
+     * @param rewardList reward列表
+     * @param lang 数据语言
+     */
+    private void updateRewardInfo(List<Reward> rewardList, String lang) {
+
+        Set<Integer> addTypeSet = new HashSet<>();
+        List<Integer> unitIdList = new ArrayList<>();
+        List<Integer> removableIdList = new ArrayList<>();
+
+        // 更新各奖励asset
+        for (Reward reward : rewardList) {
+            switch (reward.getAddType()) {
+                case ADD_TYPE_UNIT:
+                    unitIdList.add(reward.getUnitId());
+                    break;
+                case ADD_TYPE_REMOVABLE:
+                    removableIdList.add(reward.getItemId());
+                    break;
+                case ADD_TYPE_ITEM:
+                case ADD_TYPE_STICKER:
+                case ADD_TYPE_AWARD:
+                case ADD_TYPE_BACKGROUND:
+                    break;
+                default:
+                    addTypeSet.add(reward.getAddType());
+                    break;
+            }
+
         }
 
         // 从数据库中查询资源
@@ -485,61 +607,71 @@ public class LlproxyServiceImpl implements LlproxyService {
         }
 
         // 利用查询到的资源更新
-        for (EffortBox effortBox : effortBoxList) {
-            for (Reward reward : effortBox.getRewards()) {
-                switch (reward.getAddType()) {
-                    case ADD_TYPE_ITEM:
-                        if (reward.getItemId() == ITEM_ID_LOVECA_PIECE) {
-                            reward.setName(NAME_LOVECA_PIECE);
-                        }
-                        reward.setAsset(String.format(ITEM_ASSET, reward.getItemId() < 10 ?
-                                "0" + reward.getItemId() : reward.getItemId()));
-                        break;
-                    case ADD_TYPE_UNIT:
-                        unitIdList.add(reward.getUnitId());
-                        if (unitsMap != null && unitsMap.containsKey(reward.getUnitId())) {
-                            Unit unit = unitsMap.get(reward.getUnitId());
-                            reward.setName(unit.getName());
-                            reward.setAsset(unit.getNormalIconAsset());
-                        }
-                        break;
-                    case ADD_TYPE_STICKER:
-                        if (reward.getItemId() == ITEM_ID_STICKER) {
-                            reward.setName(NAME_STICKER);
-                            reward.setAsset(STICKER_ASSET);
-                        }
-                        break;
-                    case ADD_TYPE_AWARD:
-                        Award award = llProxyMapper.findAward(reward.getItemId(), lang);
-                        reward.setName(award.getName());
-                        reward.setAsset(award.getImgAsset());
-                        break;
-                    case ADD_TYPE_BACKGROUND:
-                        Background background = llProxyMapper.findBackground(reward.getItemId(), lang);
-                        reward.setName(background.getName());
-                        reward.setAsset(background.getThumbnailAsset());
-                        break;
-                    case ADD_TYPE_REMOVABLE:
-                        removableIdList.add(reward.getItemId());
-                        if (removablesMap != null && removablesMap.containsKey(reward.getItemId())) {
-                            UnitRemovableSkill unitRemovableSkill = removablesMap.get(reward.getItemId());
-                            reward.setName(unitRemovableSkill.getName());
-                            reward.setAsset(unitRemovableSkill.getIconAsset());
-                        }
-                        break;
-                    default:
-                        if (addTypesMap != null && addTypesMap.containsKey(reward.getAddType())) {
-                            AddType addType = addTypesMap.get(reward.getAddType());
-                            reward.setName(addType.getName());
-                            reward.setAsset(addType.getSmallAsset());
-                        }
-                        break;
-                }
+        for (Reward reward : rewardList) {
+            switch (reward.getAddType()) {
+                case ADD_TYPE_ITEM:
+                    if (reward.getItemId() == ITEM_ID_LOVECA_PIECE) {
+                        reward.setName(NAME_LOVECA_PIECE);
+                    }
+                    reward.setAsset(String.format(ITEM_ASSET, reward.getItemId() < 10 ?
+                            "0" + reward.getItemId() : reward.getItemId()));
+                    break;
+                case ADD_TYPE_UNIT:
+                    unitIdList.add(reward.getUnitId());
+                    if (unitsMap != null && unitsMap.containsKey(reward.getUnitId())) {
+                        Unit unit = unitsMap.get(reward.getUnitId());
+                        reward.setName(unit.getName());
+                        reward.setAsset(unit.getNormalIconAsset());
+                    }
+                    break;
+                case ADD_TYPE_STICKER:
+                    if (reward.getItemId() == ITEM_ID_STICKER) {
+                        reward.setName(NAME_STICKER);
+                        reward.setAsset(STICKER_ASSET);
+                    }
+                    break;
+                case ADD_TYPE_AWARD:
+                    Award award = llProxyMapper.findAward(reward.getItemId(), lang);
+                    reward.setName(award.getName());
+                    reward.setAsset(award.getImgAsset());
+                    break;
+                case ADD_TYPE_BACKGROUND:
+                    Background background = llProxyMapper.findBackground(reward.getItemId(), lang);
+                    reward.setName(background.getName());
+                    reward.setAsset(background.getThumbnailAsset());
+                    break;
+                case ADD_TYPE_REMOVABLE:
+                    removableIdList.add(reward.getItemId());
+                    if (removablesMap != null && removablesMap.containsKey(reward.getItemId())) {
+                        UnitRemovableSkill unitRemovableSkill = removablesMap.get(reward.getItemId());
+                        reward.setName(unitRemovableSkill.getName());
+                        reward.setAsset(unitRemovableSkill.getIconAsset());
+                    }
+                    break;
+                case ADD_TYPE_LP:
+                    if (reward.getItemId() == ITEM_ID_SYRUP) {
+                        log.info("Found lp!!!");
+                        reward.setName(NAME_SYRUP);
+                        reward.setAsset(SYRUP_ASSET);
+                    }
+                    break;
+                default:
+                    if (addTypesMap != null && addTypesMap.containsKey(reward.getAddType())) {
+                        AddType addType = addTypesMap.get(reward.getAddType());
+                        reward.setName(addType.getName());
+                        reward.setAsset(addType.getSmallAsset());
+                    }
+                    break;
             }
         }
 
     }
 
+    /**
+     * 获取奖励对应的统计key
+     * @param reward 奖励
+     * @return 统计key
+     */
     private String getTypeKey(Reward reward) {
         switch (reward.getAddType()) {
             case ADD_TYPE_ITEM:
@@ -601,6 +733,12 @@ public class LlproxyServiceImpl implements LlproxyService {
                     return "学园偶像技能 - 九重奏(C4)";
                 } else {
                     return "学园偶像技能 - 个宝(C4)";
+                }
+            case ADD_TYPE_LP:
+                if (reward.getItemId() == ITEM_ID_SYRUP) {
+                    return "糖浆";
+                } else {
+                    return "耐力恢复道具 - 其它";
                 }
             default:
                 return "其它";
