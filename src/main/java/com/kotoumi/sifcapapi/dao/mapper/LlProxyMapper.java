@@ -8,9 +8,12 @@ import com.kotoumi.sifcapapi.model.vo.service.Deck;
 import com.kotoumi.sifcapapi.model.vo.service.DuelLiveBox;
 import com.kotoumi.sifcapapi.model.vo.service.EffortBox;
 import com.kotoumi.sifcapapi.model.vo.service.Live;
-import com.kotoumi.sifcapapi.model.vo.service.UnitRemovableSkill;
+import com.kotoumi.sifcapapi.model.vo.service.LpRecovery;
+import com.kotoumi.sifcapapi.model.vo.service.LpRecoverySummary;
+import com.kotoumi.sifcapapi.model.vo.service.RecoveryItem;
 import com.kotoumi.sifcapapi.model.vo.service.SecretBoxLog;
 import com.kotoumi.sifcapapi.model.vo.service.Unit;
+import com.kotoumi.sifcapapi.model.vo.service.UnitRemovableSkill;
 import com.kotoumi.sifcapapi.model.vo.service.User;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
@@ -315,5 +318,46 @@ public interface LlProxyMapper {
      */
     Background findBackground(@Param("backgroundId") int backgroundId,
                               @Param("lang") String lang);
+
+    /**
+     * 获取LP回复信息
+     * @param userId 用户ID
+     * @param start 开始顺位
+     * @param limit 显示数量
+     * @param loveca 是否仅显示爱心消耗
+     * @param lang 数据语言
+     * @return LP回复信息
+     */
+    List<LpRecovery> searchLpRecoveryLog(@Param("userId") int userId,
+                                         @Param("start") int start,
+                                         @Param("limit") int limit,
+                                         @Param("loveca") Integer loveca,
+                                         @Param("lang") String lang);
+
+    /**
+     * 获取LP回复信息总数
+     * @param userId 用户ID
+     * @param loveca 是否仅显示爱心消耗
+     * @param lang 数据语言
+     * @return LP回复信息总数
+     */
+    int countLpRecoveryLog(@Param("userId") int userId,
+                           @Param("loveca") Integer loveca,
+                           @Param("lang") String lang);
+
+    /**
+     * 获取恢复道具信息
+     * @param lang 数据语言
+     * @return 恢复道具信息
+     */
+    List<RecoveryItem> findLpRecoveryItems(@Param("lang") String lang);
+
+    /**
+     * 获取LP回复统计信息
+     * @param lang 数据语言
+     * @return 回复统计信息
+     */
+    LpRecoverySummary summaryLpRecoveryLog(@Param("userId") int userId,
+                                           @Param("lang") String lang);
 
 }

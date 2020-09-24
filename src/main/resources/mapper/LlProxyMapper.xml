@@ -489,4 +489,45 @@
         limit 1
     </select>
 
+    <select id="searchLpRecoveryLog" resultType="com.kotoumi.sifcapapi.model.vo.service.LpRecovery">
+        select * from lp_recovery
+        <where>
+            user_id = #{userId}
+            <if test="loveca == 1">
+                and item_id = 0
+            </if>
+        </where>
+        order by recovery_time desc
+        limit #{start}, #{limit}
+    </select>
+
+    <select id="countLpRecoveryLog" resultType="Integer">
+        select count(1) from lp_recovery
+        <where>
+            user_id = #{userId}
+            <if test="loveca == 1">
+                and item_id = 0
+            </if>
+        </where>
+    </select>
+
+    <select id="findLpRecoveryItems" resultType="com.kotoumi.sifcapapi.model.vo.service.RecoveryItem">
+        select * from recovery_item_m_${lang}
+    </select>
+
+    <select id="summaryLpRecoveryLog" resultType="com.kotoumi.sifcapapi.model.vo.service.LpRecoverySummary">
+        select
+            sum(lp_recovery.amount * IF(lp_recovery.item_id = 0, lp_recovery.energy_max,
+                IF(recovery_item_m_${lang}.recovery_type = 1,
+                    ROUND(lp_recovery.energy_max * recovery_item_m_${lang}.recovery_value / 100),
+                    recovery_item_m_${lang}.recovery_value))) as total_lp,
+            sum(IF(lp_recovery.item_id = 0, 1, 0)) as loveca_count
+        from lp_recovery
+        left join recovery_item_m_${lang}
+        on lp_recovery.item_id = recovery_item_m_${lang}.recovery_item_id
+        <where>
+            lp_recovery.user_id = #{userId}
+        </where>
+    </select>
+
 </mapper>

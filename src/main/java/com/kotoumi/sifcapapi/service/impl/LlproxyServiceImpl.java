@@ -3,14 +3,15 @@ package com.kotoumi.sifcapapi.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.kotoumi.sifcapapi.dao.mapper.LlProxyMapper;
+import com.kotoumi.sifcapapi.model.vo.response.BoxStatResponse;
+import com.kotoumi.sifcapapi.model.vo.response.BoxTypeStat;
 import com.kotoumi.sifcapapi.model.vo.response.DeckInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.response.DuelLiveBoxLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.EffortBoxLogResponse;
-import com.kotoumi.sifcapapi.model.vo.response.BoxStatResponse;
-import com.kotoumi.sifcapapi.model.vo.response.BoxTypeStat;
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
 import com.kotoumi.sifcapapi.model.vo.response.LiveDetailResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
+import com.kotoumi.sifcapapi.model.vo.response.LpRecoveryLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.SecretBoxLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.UnitsInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.service.AddType;
@@ -22,10 +23,13 @@ import com.kotoumi.sifcapapi.model.vo.service.DuelLiveBoxStat;
 import com.kotoumi.sifcapapi.model.vo.service.EffortBox;
 import com.kotoumi.sifcapapi.model.vo.service.EffortBoxStat;
 import com.kotoumi.sifcapapi.model.vo.service.Live;
-import com.kotoumi.sifcapapi.model.vo.service.UnitRemovableSkill;
+import com.kotoumi.sifcapapi.model.vo.service.LpRecovery;
+import com.kotoumi.sifcapapi.model.vo.service.LpRecoverySummary;
+import com.kotoumi.sifcapapi.model.vo.service.RecoveryItem;
 import com.kotoumi.sifcapapi.model.vo.service.Reward;
 import com.kotoumi.sifcapapi.model.vo.service.SecretBoxLog;
 import com.kotoumi.sifcapapi.model.vo.service.Unit;
+import com.kotoumi.sifcapapi.model.vo.service.UnitRemovableSkill;
 import com.kotoumi.sifcapapi.model.vo.service.User;
 import com.kotoumi.sifcapapi.service.LlproxyService;
 import lombok.extern.slf4j.Slf4j;
@@ -368,6 +372,39 @@ public class LlproxyServiceImpl implements LlproxyService {
         }
         log.info("duelLiveBoxStat last open time: {}", duelLiveBoxStat.getLastOpenTime());
         return new BoxStatResponse(boxTypeStatList, duelLiveBoxStat.getLastOpenTime());
+    }
+
+    @Override
+    public LpRecoveryLogResponse lpRecoveryLog(int uid, int page, int limit, Integer loveca, String lang) {
+        // 获取用户LP回复信息
+        int start = limit * (page - 1);
+        List<LpRecovery> lpRecoveryList = llProxyMapper.searchLpRecoveryLog(uid, start, limit, loveca, lang);
+        int lpRecoveryLogCount = llProxyMapper.countLpRecoveryLog(uid, loveca, lang);
+        LpRecoverySummary summaryLpRecoveryLog = llProxyMapper.summaryLpRecoveryLog(uid, lang);
+
+        // 获取全部恢复道具，并更新回复信息数据
+        List<RecoveryItem> recoveryItemList = llProxyMapper.findLpRecoveryItems(lang);
+        recoveryItemList.add(new RecoveryItem(0, "爱心", 1, 100, "assets/image/item/icon/item_icon_09.png"));
+        Map<Integer, RecoveryItem> recoveryItemMap = new HashMap<>();
+        for (RecoveryItem recoveryItem : recoveryItemList) {
+            recoveryItemMap.put(recoveryItem.getRecoveryItemId(), recoveryItem);
+        }
+        for (LpRecovery lpRecovery : lpRecoveryList) {
+            if (recoveryItemMap.containsKey(lpRecovery.getItemId())) {
+                RecoveryItem recoveryItem = recoveryItemMap.get(lpRecovery.getItemId());
+                lpRecovery.setName(recoveryItem.getName());
+                lpRecovery.setAsset(recoveryItem.getMiddleAsset());
+                int singleLp = recoveryItem.getRecoveryValue();
+                if (recoveryItem.getRecoveryType() == 1) {
+                    singleLp = recoveryItem.getRecoveryValue() == 50 ? (lpRecovery.getEnergyMax() + 1) / 2 : lpRecovery.getEnergyMax();
+                }
+                lpRecovery.setLpAmount(lpRecovery.getAmount() * singleLp);
+            } else {
+                log.error("Find recovery item failed: {}", lpRecovery.getItemId());
+            }
+        }
+
+        return new LpRecoveryLogResponse(lpRecoveryList, summaryLpRecoveryLog.getTotalLp(), summaryLpRecoveryLog.getLovecaCount(), page, (lpRecoveryLogCount - 1) / limit + 1, limit, lpRecoveryLogCount);
     }
 
     /**

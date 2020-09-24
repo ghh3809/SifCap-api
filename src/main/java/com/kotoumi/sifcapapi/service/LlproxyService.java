@@ -7,6 +7,7 @@ import com.kotoumi.sifcapapi.model.vo.response.BoxStatResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
 import com.kotoumi.sifcapapi.model.vo.response.LiveDetailResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
+import com.kotoumi.sifcapapi.model.vo.response.LpRecoveryLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.SecretBoxLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.UnitsInfoResponse;
 import com.kotoumi.sifcapapi.model.vo.service.User;
@@ -156,6 +157,17 @@ public interface LlproxyService {
      * @return 开箱记录
      */
     BoxStatResponse duelLiveBoxStat(Integer uid);
+
+    /**
+     * 获取LP恢复记录
+     * @param uid 用户id
+     * @param page 页码
+     * @param limit 数量
+     * @param loveca 是否只看爱心消耗
+     * @param lang 数据语音
+     * @return LP恢复记录
+     */
+    LpRecoveryLogResponse lpRecoveryLog(int uid, int page, int limit, Integer loveca, String lang);
 
 
 }

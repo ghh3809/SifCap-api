@@ -8,8 +8,10 @@ import com.kotoumi.sifcapapi.model.vo.response.BoxStatResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
 import com.kotoumi.sifcapapi.model.vo.response.LiveDetailResponse;
 import com.kotoumi.sifcapapi.model.vo.response.LiveInfoResponse;
+import com.kotoumi.sifcapapi.model.vo.response.LpRecoveryLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.SecretBoxLogResponse;
 import com.kotoumi.sifcapapi.model.vo.response.UnitsInfoResponse;
+import com.kotoumi.sifcapapi.model.vo.service.LpRecovery;
 import com.kotoumi.sifcapapi.model.vo.service.User;
 import com.kotoumi.sifcapapi.service.LlproxyService;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ import javax.annotation.Resource;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.io.ByteArrayInputStream;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -264,6 +267,22 @@ public class LlproxyController extends BaseController {
         log.info("duelLiveBoxStat uid: {}", uid);
         BoxStatResponse boxStatResponse = llproxyService.duelLiveBoxStat(uid);
         return ResponseEntity.ok(finish(boxStatResponse));
+
+    }
+
+    @GetMapping("lpRecoveryLog")
+    public ResponseEntity<?> lpRecoveryLog(@Min(value = 1, message = "uid") int uid,
+                                           @Min(value = 1, message = "page") int page,
+                                           @Min(value = 1, message = "limit") int limit,
+                                           @RequestParam(name = "loveca", required = false) Integer loveca,
+                                           @RequestParam(name = "lang", required = false) String lang) {
+
+        log.info("lpRecovery uid: {}, page: {}, limit: {}, loveca: {}, lang: {}", uid, page, limit, loveca, lang);
+        if (StringUtils.isBlank(lang)) {
+            lang = "CN";
+        }
+        LpRecoveryLogResponse lpRecoveryLogResponse = llproxyService.lpRecoveryLog(uid, page, limit, loveca, lang);
+        return ResponseEntity.ok(finish(lpRecoveryLogResponse));
 
     }
 
