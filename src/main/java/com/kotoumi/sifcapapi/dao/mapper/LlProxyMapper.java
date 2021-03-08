@@ -1,23 +1,12 @@
 package com.kotoumi.sifcapapi.dao.mapper;
 
 import com.kotoumi.sifcapapi.model.vo.response.LLHelperUnit;
-import com.kotoumi.sifcapapi.model.vo.service.AddType;
-import com.kotoumi.sifcapapi.model.vo.service.Award;
-import com.kotoumi.sifcapapi.model.vo.service.Background;
-import com.kotoumi.sifcapapi.model.vo.service.Deck;
-import com.kotoumi.sifcapapi.model.vo.service.DuelLiveBox;
-import com.kotoumi.sifcapapi.model.vo.service.EffortBox;
-import com.kotoumi.sifcapapi.model.vo.service.Live;
-import com.kotoumi.sifcapapi.model.vo.service.LpRecovery;
-import com.kotoumi.sifcapapi.model.vo.service.LpRecoverySummary;
-import com.kotoumi.sifcapapi.model.vo.service.RecoveryItem;
-import com.kotoumi.sifcapapi.model.vo.service.SecretBoxLog;
-import com.kotoumi.sifcapapi.model.vo.service.Unit;
-import com.kotoumi.sifcapapi.model.vo.service.UnitRemovableSkill;
-import com.kotoumi.sifcapapi.model.vo.service.User;
+import com.kotoumi.sifcapapi.model.vo.service.*;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.session.SqlSession;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -359,5 +348,40 @@ public interface LlProxyMapper {
      */
     LpRecoverySummary summaryLpRecoveryLog(@Param("userId") int userId,
                                            @Param("lang") String lang);
+
+    /**
+     * 插入排名数据
+     * @param eventId 活动ID
+     * @param type 类型，pt/live
+     * @param rank 名次
+     * @param score 分数
+     */
+    void insertEventRank(@Param("eventId") int eventId,
+                         @Param("type") String type,
+                         @Param("rank") int rank,
+                         @Param("score") int score);
+
+    /**
+     * 获取当前正在进行的活动
+     * @return 正在进行的活动ID
+     */
+    Integer getCurrentEventId();
+
+    /**
+     * 获取当前活动下获得排名信息的request（最近10条）
+     * @param eventId 活动ID
+     * @param type 类型，pt/live
+     * @param rank 排名
+     * @return 排名信息的request
+     */
+    List<EventRequest> getEventRequests(@Param("eventId") int eventId,
+                                        @Param("type") String type,
+                                        @Param("rank") int rank);
+
+    /**
+     * 删除无效的request
+     * @param id id
+     */
+    void deleteEventRequest(@Param("id") long id);
 
 }

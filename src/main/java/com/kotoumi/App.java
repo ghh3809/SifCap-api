@@ -1,6 +1,8 @@
 package com.kotoumi;
 
 import com.kotoumi.sifcapapi.filter.LoggerFilter;
+import com.kotoumi.sifcapapi.util.RankUpdater;
+import com.kotoumi.sifcapapi.util.SpringApplicationContextHolder;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,6 +14,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -49,6 +53,9 @@ public class App {
         SpringApplication application = new SpringApplication(App.class);
         application.addListeners(new ApplicationPidFileWriter());
         application.run(args);
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        scheduledExecutorService.scheduleWithFixedDelay(SpringApplicationContextHolder.getBean(RankUpdater.class),
+                1, 1, TimeUnit.MINUTES);
     }
 
 }

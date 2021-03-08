@@ -530,4 +530,38 @@
         </where>
     </select>
 
+    <insert id="insertEventRank">
+        insert into event_rank set event_id = #{eventId}
+        <if test="type != null">
+            , type = #{type}
+        </if>
+        <if test="rank != null">
+            , `rank` = #{rank}
+        </if>
+        <if test="score != null">
+            , score = #{score}
+        </if>
+    </insert>
+
+    <select id="getCurrentEventId" resultType="Integer">
+        select event_id from event_map
+        <where>
+            start_time &lt; CURRENT_TIMESTAMP and end_time &gt; CURRENT_TIMESTAMP
+        </where>
+        limit 1
+    </select>
+
+    <select id="getEventRequests" resultType="com.kotoumi.sifcapapi.model.vo.service.EventRequest">
+        select * from event_request
+        <where>
+            event_id = #{eventId} and type = #{type} and rank = #{rank} and enable = 1
+        </where>
+        order by request_time desc limit 10
+    </select>
+
+    <update id="deleteEventRequest">
+        update event_request set enable = 0
+        where id = #{id}
+    </update>
+
 </mapper>
