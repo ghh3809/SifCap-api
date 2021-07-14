@@ -158,6 +158,7 @@ public class LlproxyServiceImpl implements LlproxyService {
         List<SecretBoxLog> secretBoxLogList = llProxyMapper.searchSecretBoxLog(uid, start, limit, type, lang);
         int secretBoxLogCount = llProxyMapper.countSecretBoxLog(uid, type, lang);
         for (SecretBoxLog secretBoxLog : secretBoxLogList) {
+            secretBoxLog.setUnitsJson("[" + secretBoxLog.getUnitsJson() + "]");
             updateSecretBoxLogInfo(secretBoxLog);
         }
         return new SecretBoxLogResponse(secretBoxLogList, page, (secretBoxLogCount - 1) / limit + 1, limit, secretBoxLogCount);

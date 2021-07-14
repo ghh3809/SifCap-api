@@ -327,7 +327,7 @@
                SUM(IF(box.rarity = 5, 1, 0)) as ssr_cnt,
                SUM(IF(box.rarity = 4, 1, 0)) as ur_cnt,
                box.pon_time,
-               JSON_ARRAYAGG(JSON_OBJECT(
+               GROUP_CONCAT(JSON_OBJECT(
                    'unit_id', box.unit_id,
                    'rank', box.rank,
                    'rarity', box.rarity,

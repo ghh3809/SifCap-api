@@ -281,7 +281,7 @@ public class LlproxyController extends BaseController {
         if (StringUtils.isBlank(lang)) {
             lang = "CN";
         }
-        LpRecoveryLogResponse lpRecoveryLogResponse = llproxyService.lpRecoveryLog(uid, page, limit, loveca, lang);
+        LpRecoveryLogResponse lpRecoveryLogResponse = llproxyService.lpRecoveryLog(uid, page, limit, loveca, lang.toLowerCase());
         return ResponseEntity.ok(finish(lpRecoveryLogResponse));
 
     }
